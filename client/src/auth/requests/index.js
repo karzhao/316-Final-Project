@@ -31,13 +31,13 @@ export const loginUser = (email, password) => {
     })
 }
 export const logoutUser = () => api.get(`/logout/`)
-export const registerUser = (firstName, lastName, email, password, passwordVerify) => {
+export const registerUser = (userName, email, password, passwordVerify, avatar) => {
     return api.post(`/register/`, {
-        firstName : firstName,
-        lastName : lastName,
+        userName : userName,
         email : email,
         password : password,
-        passwordVerify : passwordVerify
+        passwordVerify : passwordVerify,
+        avatar: avatar
     })
 }
 const apis = {

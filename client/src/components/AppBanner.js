@@ -13,6 +13,7 @@ import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
+import Avatar from '@mui/material/Avatar';
 
 export default function AppBanner() {
     const { auth } = useContext(AuthContext);
@@ -88,9 +89,18 @@ export default function AppBanner() {
     
     function getAccountMenu(loggedIn) {
         let userInitials = auth.getUserInitials();
+        const avatarSrc = auth.user?.avatar;
         console.log("userInitials: " + userInitials);
-        if (loggedIn) 
-            return <div>{userInitials}</div>;
+        if (loggedIn) {
+            return (
+                <Avatar
+                    sx={{ width: 40, height: 40, bgcolor: "primary.light" }}
+                    src={avatarSrc || undefined}
+                >
+                    {!avatarSrc ? userInitials : null}
+                </Avatar>
+            );
+        }
         else
             return <AccountCircle />;
     }

@@ -30,9 +30,6 @@ export default function SplashScreen() {
                 <Typography variant="h3" component="h1" className="splash-title">
                     The Playlister
                 </Typography>
-                <Typography variant="subtitle1" className="splash-subtitle">
-                    Create, share, and discover playlists without missing a beat.
-                </Typography>
                 <Stack direction="row" spacing={2} className="splash-actions">
                     <Button variant="contained" color="primary" onClick={handleLogin}>
                         Login

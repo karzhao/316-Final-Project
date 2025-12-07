@@ -19,9 +19,9 @@ getLoggedIn = async (req, res) => {
         return res.status(200).json({
             loggedIn: true,
             user: {
-                firstName: loggedInUser.firstName,
-                lastName: loggedInUser.lastName,
-                email: loggedInUser.email
+                userName: loggedInUser.userName,
+                email: loggedInUser.email,
+                avatar: loggedInUser.avatar
             }
         })
     } catch (err) {
@@ -33,7 +33,8 @@ getLoggedIn = async (req, res) => {
 loginUser = async (req, res) => {
     console.log("loginUser");
     try {
-        const { email, password } = req.body;
+        const email = (req.body.email || "").trim().toLowerCase();
+        const password = req.body.password || "";
 
         if (!email || !password) {
             return res
@@ -73,9 +74,9 @@ loginUser = async (req, res) => {
         }).status(200).json({
             success: true,
             user: {
-                firstName: existingUser.firstName,
-                lastName: existingUser.lastName,  
-                email: existingUser.email              
+                userName: existingUser.userName,
+                email: existingUser.email,
+                avatar: existingUser.avatar              
             }
         })
 
@@ -97,14 +98,35 @@ logoutUser = async (req, res) => {
 registerUser = async (req, res) => {
     console.log("REGISTERING USER IN BACKEND");
     try {
-        const { firstName, lastName, email, password, passwordVerify } = req.body;
-        console.log("create user: " + firstName + " " + lastName + " " + email + " " + password + " " + passwordVerify);
-        if (!firstName || !lastName || !email || !password || !passwordVerify) {
+        const payload = req.body || {};
+        const userName = (payload.userName || payload.username || "").trim();
+        const email = (payload.email || "").trim().toLowerCase();
+        const password = payload.password || "";
+        const passwordVerify = payload.passwordVerify || payload.passwordConfirm || "";
+        const avatar = payload.avatar || "";
+
+        console.log("create user payload:", {
+            userName,
+            email,
+            avatarProvided: Boolean(avatar)
+        });
+
+        const missingFields = [];
+        if (!userName) missingFields.push("userName");
+        if (!email) missingFields.push("email");
+        if (!password) missingFields.push("password");
+        if (!passwordVerify) missingFields.push("passwordVerify");
+        if (missingFields.length > 0) {
             return res
                 .status(400)
-                .json({ errorMessage: "Please enter all required fields." });
+                .json({ errorMessage: `Please enter all required fields (${missingFields.join(", ")}).` });
         }
         console.log("all fields provided");
+        if (!userName.trim()) {
+            return res
+                .status(400)
+                .json({ errorMessage: "Please provide a valid user name." });
+        }
         if (password.length < 8) {
             return res
                 .status(400)
@@ -137,28 +159,24 @@ registerUser = async (req, res) => {
         const passwordHash = await bcrypt.hash(password, salt);
         console.log("passwordHash: " + passwordHash);
 
-        const newUser = new User({firstName, lastName, email, passwordHash});
+        const newUser = new User({
+            userName,
+            email,
+            passwordHash,
+            avatar: avatar || ""
+        });
         const savedUser = await newUser.save();
         console.log("new user saved: " + savedUser._id);
 
-        // LOGIN THE USER
-        const token = auth.signToken(savedUser._id);
-        console.log("token:" + token);
-
-        await res.cookie("token", token, {
-            httpOnly: true,
-            secure: true,
-            sameSite: "none"
-        }).status(200).json({
+        // Do NOT log the user in on creation; require explicit login per spec
+        return res.status(200).json({
             success: true,
             user: {
-                firstName: savedUser.firstName,
-                lastName: savedUser.lastName,  
-                email: savedUser.email              
+                userName: savedUser.userName,
+                email: savedUser.email,
+                avatar: savedUser.avatar              
             }
         })
-
-        console.log("token sent");
 
     } catch (err) {
         console.error(err);

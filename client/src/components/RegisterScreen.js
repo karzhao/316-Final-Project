@@ -1,6 +1,5 @@
-import { useContext } from 'react';
+import { useContext, useMemo, useState } from 'react';
 import AuthContext from '../auth'
-import MUIErrorModal from './MUIErrorModal'
 import Copyright from './Copyright'
 
 import Avatar from '@mui/material/Avatar';
@@ -13,121 +12,246 @@ import Link from '@mui/material/Link';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
+import Stack from '@mui/material/Stack';
+import PhotoCamera from '@mui/icons-material/PhotoCamera';
+
+const REQUIRED_AVATAR_SIZE = 128;
 
 export default function RegisterScreen() {
     const { auth } = useContext(AuthContext);
+    const [values, setValues] = useState({
+        userName: "",
+        email: "",
+        password: "",
+        passwordVerify: ""
+    });
+    const [avatarDataUrl, setAvatarDataUrl] = useState("");
+    const [avatarError, setAvatarError] = useState("");
+    const [touched, setTouched] = useState({
+        userName: false,
+        email: false,
+        password: false,
+        passwordVerify: false
+    });
+
+    const handleBlur = (field) => () => {
+        setTouched((prev) => ({ ...prev, [field]: true }));
+    };
+
+    const handleChange = (field) => (event) => {
+        const { value } = event.target;
+        setValues((prev) => ({ ...prev, [field]: value }));
+    };
+
+    const emailValid = useMemo(() => /\S+@\S+\.\S+/.test(values.email.trim()), [values.email]);
+    const passwordLongEnough = values.password.length >= 8;
+    const passwordsMatch = values.password === values.passwordVerify;
+    const userNameValid = values.userName.trim().length > 0;
+    const avatarValid = Boolean(avatarDataUrl) && !avatarError;
+
+    const formValid = userNameValid && emailValid && passwordLongEnough && passwordsMatch && avatarValid;
+
+    const handleAvatarChange = (event) => {
+        const file = event.target.files && event.target.files[0];
+        if (!file) {
+            setAvatarDataUrl("");
+            setAvatarError("Please select an avatar image.");
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (loadEvent) => {
+            const dataUrl = loadEvent.target.result;
+            const img = new Image();
+            img.onload = () => {
+                if (img.width !== REQUIRED_AVATAR_SIZE || img.height !== REQUIRED_AVATAR_SIZE) {
+                    setAvatarError(`Avatar must be exactly ${REQUIRED_AVATAR_SIZE}x${REQUIRED_AVATAR_SIZE}px.`);
+                    setAvatarDataUrl("");
+                } else {
+                    setAvatarError("");
+                    setAvatarDataUrl(dataUrl);
+                }
+            };
+            img.onerror = () => {
+                setAvatarError("Could not read that image. Please try another file.");
+                setAvatarDataUrl("");
+            };
+            img.src = dataUrl;
+        };
+        reader.readAsDataURL(file);
+    };
 
     const handleSubmit = (event) => {
         event.preventDefault();
-        const formData = new FormData(event.currentTarget);
+        setTouched({
+            userName: true,
+            email: true,
+            password: true,
+            passwordVerify: true
+        });
+        if (!formValid) return;
+        const emailLower = values.email.trim().toLowerCase();
         auth.registerUser(
-            formData.get('firstName'),
-            formData.get('lastName'),
-            formData.get('email'),
-            formData.get('password'),
-            formData.get('passwordVerify')
+            values.userName.trim(),
+            emailLower,
+            values.password,
+            values.passwordVerify,
+            avatarDataUrl
         );
     };
 
-    let modalJSX = ""
-    console.log(auth);
-    if (auth.errorMessage !== null){
-        modalJSX = <MUIErrorModal />;
-    }
-    console.log(modalJSX);
+    const fieldHelperText = {
+        userName: touched.userName && !userNameValid ? "User name is required." : " ",
+        email: touched.email && !emailValid ? "Enter a valid email address." : " ",
+        password: touched.password && !passwordLongEnough ? "At least 8 characters." : " ",
+        passwordVerify: touched.passwordVerify && !passwordsMatch ? "Passwords must match." : " "
+    };
 
     return (
-            <Container component="main" maxWidth="xs">
-                <CssBaseline />
-                <Box
-                    sx={{
-                        marginTop: 8,
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                    }}
-                >
-                    <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
-                        <LockOutlinedIcon />
-                    </Avatar>
-                    <Typography component="h1" variant="h5">
-                        Sign up
-                    </Typography>
-                    <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
-                        <Grid container spacing={2}>
-                            <Grid item xs={12} sm={6}>
-                                <TextField
-                                    autoComplete="fname"
-                                    name="firstName"
-                                    required
+        <Container component="main" maxWidth="sm">
+            <CssBaseline />
+            <Box
+                sx={{
+                    marginTop: 8,
+                    padding: { xs: 3, sm: 4 },
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    borderRadius: 3,
+                    boxShadow: 4,
+                    backgroundColor: '#fffdf7',
+                    border: '1px solid #e8e3ff'
+                }}
+            >
+                <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
+                    <LockOutlinedIcon />
+                </Avatar>
+                <Typography component="h1" variant="h4" sx={{ mt: 1, mb: 2 }}>
+                    Create Account
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                    Choose a username, add your avatar (exactly {REQUIRED_AVATAR_SIZE}x{REQUIRED_AVATAR_SIZE}px), and set a secure password.
+                </Typography>
+                <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 1, width: '100%' }}>
+                    <Grid container spacing={2}>
+                        <Grid item xs={12} sm={4}>
+                            <Stack spacing={1} alignItems="center">
+                                <Avatar
+                                    src={avatarDataUrl || undefined}
+                                    sx={{ width: 90, height: 90, bgcolor: 'primary.light', fontSize: 32 }}
+                                >
+                                    {!avatarDataUrl ? values.userName.substring(0, 2).toUpperCase() : null}
+                                </Avatar>
+                                <Button
+                                    variant="outlined"
+                                    startIcon={<PhotoCamera />}
+                                    component="label"
                                     fullWidth
-                                    id="firstName"
-                                    label="First Name"
-                                    autoFocus
-                                />
-                            </Grid>
-                            <Grid item xs={12} sm={6}>
-                                <TextField
-                                    required
-                                    fullWidth
-                                    id="lastName"
-                                    label="Last Name"
-                                    name="lastName"
-                                    autoComplete="lname"
-                                />
-                            </Grid>
-                            <Grid item xs={12}>
-                                <TextField
-                                    required
-                                    fullWidth
-                                    id="email"
-                                    label="Email Address"
-                                    name="email"
-                                    autoComplete="email"
-                                />
-                            </Grid>
-                            <Grid item xs={12}>
-                                <TextField
-                                    required
-                                    fullWidth
-                                    name="password"
-                                    label="Password"
-                                    type="password"
-                                    id="password"
-                                    autoComplete="new-password"
-                                />
-                            </Grid>
-                            <Grid item xs={12}>
-                                <TextField
-                                    required
-                                    fullWidth
-                                    name="passwordVerify"
-                                    label="Password Verify"
-                                    type="password"
-                                    id="passwordVerify"
-                                    autoComplete="new-password"
-                                />
+                                >
+                                    Select Avatar
+                                    <input
+                                        hidden
+                                        accept="image/*"
+                                        type="file"
+                                        onChange={handleAvatarChange}
+                                    />
+                                </Button>
+                                <Typography variant="caption" color={avatarError ? "error" : "text.secondary"} align="center">
+                                    {avatarError || `Use a ${REQUIRED_AVATAR_SIZE}x${REQUIRED_AVATAR_SIZE}px PNG or JPG.`}
+                                </Typography>
+                            </Stack>
+                        </Grid>
+                        <Grid item xs={12} sm={8}>
+                            <Grid container spacing={2}>
+                                <Grid item xs={12}>
+                                    <TextField
+                                        required
+                                        fullWidth
+                                        id="userName"
+                                        label="User Name"
+                                        name="userName"
+                                        value={values.userName}
+                                        onChange={handleChange('userName')}
+                                        onBlur={handleBlur('userName')}
+                                        error={touched.userName && !userNameValid}
+                                        helperText={fieldHelperText.userName}
+                                        autoFocus
+                                    />
+                                </Grid>
+                                <Grid item xs={12}>
+                                    <TextField
+                                        required
+                                        fullWidth
+                                        id="email"
+                                        label="Email Address"
+                                        name="email"
+                                        value={values.email}
+                                        onChange={handleChange('email')}
+                                        onBlur={handleBlur('email')}
+                                        error={touched.email && !emailValid}
+                                        helperText={fieldHelperText.email}
+                                        autoComplete="email"
+                                    />
+                                </Grid>
+                                <Grid item xs={12}>
+                                    <TextField
+                                        required
+                                        fullWidth
+                                        name="password"
+                                        label="Password"
+                                        type="password"
+                                        id="password"
+                                        value={values.password}
+                                        onChange={handleChange('password')}
+                                        onBlur={handleBlur('password')}
+                                        error={touched.password && !passwordLongEnough}
+                                        helperText={fieldHelperText.password}
+                                        autoComplete="new-password"
+                                    />
+                                </Grid>
+                                <Grid item xs={12}>
+                                    <TextField
+                                        required
+                                        fullWidth
+                                        name="passwordVerify"
+                                        label="Password Confirm"
+                                        type="password"
+                                        id="passwordVerify"
+                                        value={values.passwordVerify}
+                                        onChange={handleChange('passwordVerify')}
+                                        onBlur={handleBlur('passwordVerify')}
+                                        error={touched.passwordVerify && !passwordsMatch}
+                                        helperText={fieldHelperText.passwordVerify}
+                                        autoComplete="new-password"
+                                    />
+                                </Grid>
                             </Grid>
                         </Grid>
-                        <Button
-                            type="submit"
-                            fullWidth
-                            variant="contained"
-                            sx={{ mt: 3, mb: 2 }}
-                        >
-                            Sign Up
-                        </Button>
-                        <Grid container justifyContent="flex-end">
-                            <Grid item>
-                                <Link href="/login/" variant="body2">
-                                    Already have an account? Sign in
-                                </Link>
-                            </Grid>
+                    </Grid>
+                    {auth.errorMessage ? (
+                        <Typography color="error" sx={{ mt: 1 }}>
+                            {auth.errorMessage}
+                        </Typography>
+                    ) : null}
+                    <Button
+                        type="submit"
+                        fullWidth
+                        variant="contained"
+                        sx={{ mt: 3, mb: 2, py: 1.4 }}
+                        disabled={!formValid}
+                    >
+                        Create Account
+                    </Button>
+                    <Grid container justifyContent="center">
+                        <Grid item>
+                            <Link href="/login/" variant="body2" underline="hover">
+                                Already have an account? Sign in
+                            </Link>
                         </Grid>
-                    </Box>
+                    </Grid>
                 </Box>
-                <Copyright sx={{ mt: 5 }} />
-                { modalJSX }
-            </Container>
+            </Box>
+            <Copyright sx={{ mt: 5 }} />
+        </Container>
     );
 }

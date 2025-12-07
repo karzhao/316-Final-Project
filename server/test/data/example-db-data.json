@@ -1,20 +1,20 @@
 {
     "users": [
         {
-            "firstName": "Joe",
-            "lastName": "Shmo",
+            "userName": "Joe Shmo",
             "email": "joe@shmo.com",
             "passwordHash": "$2a$10$dPEwsAVi1ojv2RfxxTpZjuKSAbep7zEKb5myegm.ATbQ4sJk4agGu",
+            "avatar": "",
             "playlists": [
                 "68f524b611e0f3901871f164",
                 "68f526c1ec1ea2ad00a6fae0"
             ]
         },
         {
-            "firstName": "Jane",
-            "lastName": "Doe",
+            "userName": "Jane Doe",
             "email": "jane@doe.com",
             "passwordHash": "$2a$10$dPEwsAVi1ojv2RfxxTpZjuKSAbep7zEKb5myegm.ATbQ4sJk4agGu",
+            "avatar": "",
             "playlists": [
                 "68f526c4ec1ea2ad00a6fae8"
             ]
