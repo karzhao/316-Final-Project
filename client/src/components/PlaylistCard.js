@@ -18,7 +18,7 @@ function PlaylistCard(props) {
     const { store } = useContext(GlobalStoreContext);
     const [editActive, setEditActive] = useState(false);
     const [text, setText] = useState("");
-    const { idNamePair } = props;
+    const { idNamePair, readOnly } = props;
 
     function handleLoadList(event, id) {
         console.log("handleLoadList for " + id);
@@ -30,11 +30,16 @@ function PlaylistCard(props) {
             console.log("load " + event.target.id);
 
             // CHANGE THE CURRENT LIST
-            store.setCurrentList(id);
+            if (readOnly) {
+                store.setCurrentListPublic(id);
+            } else {
+                store.setCurrentList(id);
+            }
         }
     }
 
     function handleToggleEdit(event) {
+        if (readOnly) return;
         event.stopPropagation();
         toggleEdit();
     }
@@ -48,6 +53,7 @@ function PlaylistCard(props) {
     }
 
     async function handleDeleteList(event, id) {
+        if (readOnly) return;
         event.stopPropagation();
         //let _id = event.target.id;
         //_id = ("" + _id).substring("delete-list-".length);
@@ -77,18 +83,22 @@ function PlaylistCard(props) {
             }}
         >
             <Box sx={{ p: 1, flexGrow: 1 }}>{idNamePair.name}</Box>
-            <Box sx={{ p: 1 }}>
-                <IconButton onClick={handleToggleEdit} aria-label='edit'>
-                    <EditIcon style={{fontSize:'48pt'}} />
-                </IconButton>
-            </Box>
-            <Box sx={{ p: 1 }}>
-                <IconButton onClick={(event) => {
-                        handleDeleteList(event, idNamePair._id)
-                    }} aria-label='delete'>
-                    <DeleteIcon style={{fontSize:'48pt'}} />
-                </IconButton>
-            </Box>
+            {
+                !readOnly && <>
+                <Box sx={{ p: 1 }}>
+                    <IconButton onClick={handleToggleEdit} aria-label='edit'>
+                        <EditIcon style={{fontSize:'48pt'}} />
+                    </IconButton>
+                </Box>
+                <Box sx={{ p: 1 }}>
+                    <IconButton onClick={(event) => {
+                            handleDeleteList(event, idNamePair._id)
+                        }} aria-label='delete'>
+                        <DeleteIcon style={{fontSize:'48pt'}} />
+                    </IconButton>
+                </Box>
+                </>
+            }
         </ListItem>
 
     if (editActive) {

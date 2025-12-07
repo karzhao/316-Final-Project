@@ -12,12 +12,16 @@ import Box from '@mui/material/Box'
     
     @author McKilla Gorilla
 */
-const HomeScreen = () => {
+const HomeScreen = ({ guestMode = false }) => {
     const { store } = useContext(GlobalStoreContext);
 
     useEffect(() => {
-        store.loadIdNamePairs();
-    }, []);
+        if (guestMode) {
+            store.loadPublicIdNamePairs();
+        } else {
+            store.loadIdNamePairs();
+        }
+    }, [guestMode]);
 
     function handleCreateNewList() {
         store.createNewList();
@@ -32,31 +36,38 @@ const HomeScreen = () => {
                         key={pair._id}
                         idNamePair={pair}
                         selected={false}
+                        readOnly={guestMode}
                     />
                 ))
                 
             }
-            <Fab sx={{transform:"translate(1150%, 10%)"}}
-                color="primary" 
-                aria-label="add"
-                id="add-list-button"
-                onClick={handleCreateNewList}
-            >
-                <AddIcon />
-            </Fab>
+            {
+                !guestMode &&
+                <Fab sx={{transform:"translate(1150%, 10%)"}}
+                    color="primary" 
+                    aria-label="add"
+                    id="add-list-button"
+                    onClick={handleCreateNewList}
+                >
+                    <AddIcon />
+                </Fab>
+            }
             </List>;
     }
     return (
         <div id="playlist-selector">
             <div id="list-selector-heading">
-            <Fab sx={{transform:"translate(-20%, 0%)"}}
-                color="primary" 
-                aria-label="add"
-                id="add-list-button"
-                onClick={handleCreateNewList}
-            >
-                <AddIcon />
-            </Fab>
+            {
+                !guestMode &&
+                <Fab sx={{transform:"translate(-20%, 0%)"}}
+                    color="primary" 
+                    aria-label="add"
+                    id="add-list-button"
+                    onClick={handleCreateNewList}
+                >
+                    <AddIcon />
+                </Fab>
+            }
                 Your Playlists
             </div>
             <Box sx={{bgcolor:"background.paper"}} id="list-selector-list">

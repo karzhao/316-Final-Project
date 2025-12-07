@@ -14,7 +14,8 @@ export default function SplashScreen() {
     };
 
     const handleContinueAsGuest = () => {
-        history.push('/');
+        localStorage.setItem('guestMode', 'true');
+        history.push('/guest');
     };
 
     const handleCreateAccount = () => {

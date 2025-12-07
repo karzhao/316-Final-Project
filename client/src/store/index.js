@@ -67,6 +67,10 @@ function GlobalStoreContextProvider(props) {
     const { auth } = useContext(AuthContext);
     console.log("auth: " + auth);
 
+    const isGuest = () => {
+        return !auth.loggedIn && localStorage.getItem("guestMode") === "true";
+    };
+
     // HERE'S THE DATA STORE'S REDUCER, IT MUST
     // HANDLE EVERY TYPE OF STATE CHANGE
     const storeReducer = (action) => {
@@ -281,6 +285,7 @@ function GlobalStoreContextProvider(props) {
 
     // THIS FUNCTION CREATES A NEW LIST
     store.createNewList = async function () {
+        if (isGuest()) return;
         let newListName = "Untitled" + store.newListCounter;
         const response = await storeRequestSender.createPlaylist(newListName, [], auth.user.email);
         console.log("createNewList response: " + response);
@@ -318,6 +323,19 @@ function GlobalStoreContextProvider(props) {
             }
         }
         asyncLoadIdNamePairs();
+    }
+    store.loadPublicIdNamePairs = function () {
+        async function asyncLoadPublicIdNamePairs() {
+            const response = await storeRequestSender.getPublicPlaylistPairs();
+            if (response.data.success) {
+                let pairsArray = response.data.idNamePairs;
+                storeReducer({
+                    type: GlobalStoreActionType.LOAD_ID_NAME_PAIRS,
+                    payload: pairsArray
+                });
+            }
+        }
+        asyncLoadPublicIdNamePairs();
     }
 
     // THE FOLLOWING 5 FUNCTIONS ARE FOR COORDINATING THE DELETION
@@ -400,6 +418,20 @@ function GlobalStoreContextProvider(props) {
         }
         asyncSetCurrentList(id);
     }
+    store.setCurrentListPublic = function(id) {
+        async function asyncSetCurrentListPublic(id) {
+            let response = await storeRequestSender.getPublicPlaylistById(id);
+            if (response.data.success) {
+                let playlist = response.data.playlist;
+                storeReducer({
+                    type: GlobalStoreActionType.SET_CURRENT_LIST,
+                    payload: playlist
+                });
+                history.push("/playlist/" + playlist._id);
+            }
+        }
+        asyncSetCurrentListPublic(id);
+    }
 
     store.getPlaylistSize = function() {
         return store.currentList.songs.length;
@@ -479,17 +511,20 @@ function GlobalStoreContextProvider(props) {
         tps.processTransaction(transaction);
     }    
     store.addMoveSongTransaction = function (start, end) {
+        if (isGuest()) return;
         let transaction = new MoveSong_Transaction(store, start, end);
         tps.processTransaction(transaction);
     }
     // THIS FUNCTION ADDS A RemoveSong_Transaction TO THE TRANSACTION STACK
     store.addRemoveSongTransaction = (song, index) => {
+        if (isGuest()) return;
         //let index = store.currentSongIndex;
         //let song = store.currentList.songs[index];
         let transaction = new RemoveSong_Transaction(store, index, song);
         tps.processTransaction(transaction);
     }
     store.addUpdateSongTransaction = function (index, newSongData) {
+        if (isGuest()) return;
         let song = store.currentList.songs[index];
         let oldSongData = {
             title: song.title,
@@ -501,6 +536,7 @@ function GlobalStoreContextProvider(props) {
         tps.processTransaction(transaction);
     }
     store.updateCurrentList = function() {
+        if (isGuest()) return;
         async function asyncUpdateCurrentList() {
             const response = await storeRequestSender.updatePlaylistById(store.currentList._id, store.currentList);
             if (response.data.success) {
@@ -519,13 +555,13 @@ function GlobalStoreContextProvider(props) {
         tps.doTransaction();
     }
     store.canAddNewSong = function() {
-        return (store.currentList !== null);
+        return (store.currentList !== null && !isGuest());
     }
     store.canUndo = function() {
-        return ((store.currentList !== null) && tps.hasTransactionToUndo());
+        return ((store.currentList !== null) && tps.hasTransactionToUndo() && !isGuest());
     }
     store.canRedo = function() {
-        return ((store.currentList !== null) && tps.hasTransactionToDo());
+        return ((store.currentList !== null) && tps.hasTransactionToDo() && !isGuest());
     }
     store.canClose = function() {
         return (store.currentList !== null);
@@ -551,6 +587,8 @@ function GlobalStoreContextProvider(props) {
     }
   
     document.onkeydown = (event) => KeyPress(event);
+
+    store.isGuest = isGuest;
 
     return (
         <GlobalStoreContext.Provider value={{

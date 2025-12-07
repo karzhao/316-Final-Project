@@ -26,6 +26,7 @@ const App = () => {
                     <AppBanner />
                     <Switch>
                         <Route path="/" exact component={HomeWrapper} />
+                        <Route path="/guest" exact component={HomeWrapper} />
                         <Route path="/login/" exact component={LoginScreen} />
                         <Route path="/account/edit/" exact component={EditAccountScreen} />
                         <Route path="/register/" exact component={RegisterScreen} />

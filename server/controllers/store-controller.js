@@ -179,6 +179,28 @@ getPlaylists = async (req, res) => {
         return res.status(200).json({ success: true, data: playlists })
     }).catch(err => console.log(err))
 }
+getPublicPlaylistPairs = async (req, res) => {
+    try {
+        const playlists = await Playlist.find({}, '_id name').lean();
+        const pairs = playlists.map((p) => ({ _id: p._id, name: p.name }));
+        return res.status(200).json({ success: true, idNamePairs: pairs });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ success: false, errorMessage: "Failed to load playlists." });
+    }
+}
+getPublicPlaylistById = async (req, res) => {
+    try {
+        const list = await Playlist.findById({ _id: req.params.id });
+        if (!list) {
+            return res.status(404).json({ success: false, errorMessage: 'Playlist not found' });
+        }
+        return res.status(200).json({ success: true, playlist: list });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ success: false, errorMessage: 'Server error' });
+    }
+}
 updatePlaylist = async (req, res) => {
     if(auth.verifyUser(req) === null){
         return res.status(400).json({
@@ -249,5 +271,7 @@ module.exports = {
     getPlaylistById,
     getPlaylistPairs,
     getPlaylists,
-    updatePlaylist
+    updatePlaylist,
+    getPublicPlaylistPairs,
+    getPublicPlaylistById
 }

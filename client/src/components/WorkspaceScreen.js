@@ -15,6 +15,7 @@ import { GlobalStoreContext } from '../store/index.js'
 function WorkspaceScreen() {
     const { store } = useContext(GlobalStoreContext);
     store.history = useHistory();
+    const readOnly = store.isGuest ? store.isGuest() : false;
     
     let modalJSX = "";
     if (store.isEditSongModalOpen()) {
@@ -33,6 +34,7 @@ function WorkspaceScreen() {
                         key={'playlist-song-' + (index)}
                         index={index}
                         song={song}
+                        readOnly={readOnly}
                     />
                 ))  
             }

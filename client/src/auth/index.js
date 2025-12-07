@@ -106,6 +106,7 @@ function AuthContextProvider(props) {
         try{
             const response = await authRequestSender.loginUser(email, password);
             if (response.status === 200) {
+                localStorage.removeItem("guestMode");
                 authReducer({
                     type: AuthActionType.LOGIN_USER,
                     payload: {
@@ -131,6 +132,7 @@ function AuthContextProvider(props) {
     auth.logoutUser = async function() {
         const response = await authRequestSender.logoutUser();
         if (response.status === 200) {
+            localStorage.removeItem("guestMode");
             authReducer( {
                 type: AuthActionType.LOGOUT_USER,
                 payload: null
