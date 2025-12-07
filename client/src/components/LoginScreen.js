@@ -7,10 +7,10 @@ import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
+import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
 import Link from '@mui/material/Link';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
-import Paper from '@mui/material/Paper';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 
@@ -35,39 +35,27 @@ export default function LoginScreen() {
     console.log(modalJSX);
 
     return (
-        <Grid container component="main" sx={{ height: '100vh' }}>
-            <CssBaseline />
-            <Grid
-                item
-                xs={false}
-                sm={4}
-                md={7}
-                sx={{
-                    backgroundImage: 'url(https://static.displate.com/857x1200/displate/2021-09-09/acaf2be9f58d1c05de9e4e47c580ee00_0da6a981d11a923cf24cf3f465fa81cc.jpg)',
-                    backgroundRepeat: 'no-repeat',
-                    backgroundColor: (t) =>
-                        t.palette.mode === 'light' ? t.palette.grey[50] : t.palette.grey[900],
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                }}
-            />
-            <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
+        <Box className="auth-page">
+            <Container component="main" maxWidth="sm" className="auth-card">
+                <CssBaseline />
                 <Box
                     sx={{
-                        my: 8,
-                        mx: 4,
                         display: 'flex',
                         flexDirection: 'column',
                         alignItems: 'center',
+                        gap: 1
                     }}
                 >
                     <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
                         <LockOutlinedIcon/>
                     </Avatar>
-                    <Typography component="h1" variant="h5">
-                        Sign in
+                    <Typography component="h1" variant="h4" className="auth-title" sx={{ mt: 1, mb: 1 }}>
+                        Sign In
                     </Typography>
-                    <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 1 }}>
+                    <Typography variant="body2" className="auth-subtitle">
+                        Enter your registered email and password to access your playlists.
+                    </Typography>
+                    <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 2, width: '100%' }}>
                         <TextField
                             margin="normal"
                             required
@@ -88,26 +76,31 @@ export default function LoginScreen() {
                             id="password"
                             autoComplete="current-password"
                         />
+                        {auth.errorMessage ? (
+                            <Typography color="error" sx={{ mt: 1 }}>
+                                {auth.errorMessage}
+                            </Typography>
+                        ) : null}
                         <Button
                             type="submit"
                             fullWidth
                             variant="contained"
-                            sx={{ mt: 3, mb: 2 }}
+                            sx={{ mt: 3, mb: 2, py: 1.4 }}
                         >
                             Sign In
                         </Button>
-                        <Grid container>
+                        <Grid container justifyContent="center">
                             <Grid item>
-                                <Link href="/register/" variant="body2">
+                                <Link href="/register/" variant="body2" underline="hover">
                                     Don't have an account? Sign Up
                                 </Link>
                             </Grid>
                         </Grid>
-                        <Copyright sx={{ mt: 5 }} />
                     </Box>
                 </Box>
-            </Grid>
+                <Copyright sx={{ mt: 5 }} />
+            </Container>
             { modalJSX }
-        </Grid>
+        </Box>
     );
 }
