@@ -184,9 +184,70 @@ registerUser = async (req, res) => {
     }
 }
 
+updateAccount = async (req, res) => {
+    try {
+        const userId = auth.verifyUser(req);
+        if (!userId) {
+            return res.status(401).json({
+                errorMessage: "Unauthorized"
+            });
+        }
+
+        const payload = req.body || {};
+        const userName = (payload.userName || payload.username || "").trim();
+        const password = payload.password || "";
+        const passwordVerify = payload.passwordVerify || payload.passwordConfirm || "";
+        const avatar = payload.avatar || "";
+
+        if (!userName) {
+            return res.status(400).json({ errorMessage: "Please provide a user name." });
+        }
+
+        if (password || passwordVerify) {
+            if (password.length < 8) {
+                return res.status(400).json({ errorMessage: "Please enter a password of at least 8 characters." });
+            }
+            if (password !== passwordVerify) {
+                return res.status(400).json({ errorMessage: "Please enter the same password twice." });
+            }
+        }
+
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ errorMessage: "User not found." });
+        }
+
+        user.userName = userName;
+        if (avatar) {
+            user.avatar = avatar;
+        }
+
+        if (password) {
+            const saltRounds = 10;
+            const salt = await bcrypt.genSalt(saltRounds);
+            user.passwordHash = await bcrypt.hash(password, salt);
+        }
+
+        await user.save();
+
+        return res.status(200).json({
+            success: true,
+            user: {
+                userName: user.userName,
+                email: user.email,
+                avatar: user.avatar
+            }
+        });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ errorMessage: "Server error updating account." });
+    }
+}
+
 module.exports = {
     getLoggedIn,
     registerUser,
     loginUser,
-    logoutUser
+    logoutUser,
+    updateAccount
 }

@@ -139,6 +139,32 @@ function AuthContextProvider(props) {
         }
     }
 
+    auth.updateUser = async function(userName, password, passwordVerify, avatar) {
+        try {
+            const response = await authRequestSender.updateUser(userName, password, passwordVerify, avatar);
+            if (response.status === 200) {
+                authReducer({
+                    type: AuthActionType.LOGIN_USER,
+                    payload: {
+                        user: response.data.user,
+                        loggedIn: true,
+                        errorMessage: null
+                    }
+                });
+                history.goBack();
+            }
+        } catch (error) {
+            authReducer({
+                type: AuthActionType.LOGIN_USER,
+                payload: {
+                    user: auth.user,
+                    loggedIn: true,
+                    errorMessage: error.response?.data?.errorMessage || "Failed to update account."
+                }
+            });
+        }
+    }
+
     auth.getUserInitials = function() {
         let initials = "";
         if (auth.user) {

@@ -40,11 +40,20 @@ export const registerUser = (userName, email, password, passwordVerify, avatar) 
         avatar: avatar
     })
 }
+export const updateUser = (userName, password, passwordVerify, avatar) => {
+    return api.put(`/account/`, {
+        userName: userName,
+        password: password,
+        passwordVerify: passwordVerify,
+        avatar: avatar
+    })
+}
 const apis = {
     getLoggedIn,
     registerUser,
     loginUser,
-    logoutUser
+    logoutUser,
+    updateUser
 }
 
 export default apis

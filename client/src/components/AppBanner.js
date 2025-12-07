@@ -75,6 +75,7 @@ export default function AppBanner() {
             open={isMenuOpen}
             onClose={handleMenuClose}
         >
+            <MenuItem onClick={handleMenuClose}><Link to='/account/edit/'>Edit Account</Link></MenuItem>
             <MenuItem onClick={handleLogout}>Logout</MenuItem>
         </Menu>        
 
