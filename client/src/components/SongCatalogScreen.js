@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import AuthContext from '../auth';
 import { GlobalStoreContext } from '../store';
 import songApis from '../song';
@@ -43,6 +43,7 @@ export default function SongCatalogScreen() {
     const { auth } = useContext(AuthContext);
     const { store } = useContext(GlobalStoreContext);
     const [filters, setFilters] = useState({ title: '', artist: '', year: '' });
+    const [appliedFilters, setAppliedFilters] = useState({ title: '', artist: '', year: '' });
     const [sortValue, setSortValue] = useState('listens-desc');
     const [songs, setSongs] = useState([]);
     const [modalOpen, setModalOpen] = useState(false);
@@ -59,13 +60,13 @@ export default function SongCatalogScreen() {
         }
     }, [auth.loggedIn]);
 
-    const loadSongs = async () => {
+    const loadSongs = useCallback(async (activeFilters, activeSort) => {
         try {
             const params = {
-                title: filters.title || undefined,
-                artist: filters.artist || undefined,
-                year: filters.year || undefined,
-                sort: sortValue
+                title: activeFilters.title || undefined,
+                artist: activeFilters.artist || undefined,
+                year: activeFilters.year || undefined,
+                sort: activeSort
             };
             const response = await songApis.getSongs(params);
             if (response.data.success && Array.isArray(response.data.songs)) {
@@ -78,19 +79,20 @@ export default function SongCatalogScreen() {
             console.error('Error loading songs', err);
             setSongs([]);
         }
-    };
+    }, []);
 
     useEffect(() => {
-        loadSongs();
-    }, [sortValue]);
+        loadSongs(appliedFilters, sortValue);
+    }, [appliedFilters, sortValue, loadSongs]);
 
     const handleSearch = () => {
-        loadSongs();
+        setAppliedFilters(filters);
     };
 
     const handleClear = () => {
-        setFilters({ title: '', artist: '', year: '' });
-        loadSongs();
+        const cleared = { title: '', artist: '', year: '' };
+        setFilters(cleared);
+        setAppliedFilters(cleared);
     };
 
     const openNewSong = () => {
@@ -140,8 +142,16 @@ export default function SongCatalogScreen() {
         setAddMenu({ open: false, songId: null });
     };
 
-    const handleSelectSong = (song) => {
+    const handleSelectSong = async (song) => {
         setSelectedSong(song);
+        if (song?._id) {
+            try {
+                await songApis.listenSong(song._id);
+                loadSongs();
+            } catch (err) {
+                console.error('Error incrementing listens', err);
+            }
+        }
     };
 
     const openActionsMenu = (event, song) => {

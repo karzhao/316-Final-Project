@@ -198,6 +198,18 @@ getPublicPlaylistPairs = async (req, res) => {
         return res.status(500).json({ success: false, errorMessage: "Failed to load playlists." });
     }
 }
+incrementPlaylistListen = async (req, res) => {
+    try {
+        const playlist = await Playlist.findById(req.params.id);
+        if (!playlist) return res.status(404).json({ success: false, errorMessage: "Playlist not found" });
+        playlist.listens = (playlist.listens || 0) + 1;
+        await playlist.save();
+        return res.status(200).json({ success: true, listens: playlist.listens });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ success: false, errorMessage: "Failed to increment playlist listens." });
+    }
+}
 getPublicPlaylistById = async (req, res) => {
     try {
         const list = await Playlist.findById({ _id: req.params.id });
@@ -283,5 +295,6 @@ module.exports = {
     getPublicPlaylists,
     updatePlaylist,
     getPublicPlaylistPairs,
-    getPublicPlaylistById
+    getPublicPlaylistById,
+    incrementPlaylistListen
 }

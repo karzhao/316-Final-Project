@@ -44,6 +44,7 @@ function PlaylistCard(props) {
         if (playlist) {
             setPlayPlaylist(playlist);
             setPlayOpen(true);
+            storeRequestSender.listenPlaylist(playlist._id);
             return;
         }
         try {
@@ -52,6 +53,7 @@ function PlaylistCard(props) {
                 : await storeRequestSender.getPlaylistById(idNamePair._id);
             if (response.data.success) {
                 setPlayPlaylist(response.data.playlist);
+                storeRequestSender.listenPlaylist(response.data.playlist._id);
                 setPlayOpen(true);
             }
         } catch (err) {
@@ -114,6 +116,11 @@ function PlaylistCard(props) {
                 <Typography variant="caption" display="block" sx={{ color: '#444' }}>
                     {playlist?.ownerName || playlist?.ownerEmail || ""}
                 </Typography>
+                {typeof playlist?.listens === 'number' && (
+                    <Typography variant="caption" display="block" sx={{ color: '#666' }}>
+                        {playlist.listens} listens
+                    </Typography>
+                )}
             </Box>
             <Box sx={{ p: 1 }}>
                 <Button size="small" variant="contained" color="primary" onClick={handlePlayClick}>Play</Button>
@@ -147,6 +154,7 @@ function PlaylistCard(props) {
             <MUIPlayPlaylistModal
                 open={playOpen}
                 playlistName={playPlaylist?.name || idNamePair.name}
+                playlistId={playPlaylist?._id || idNamePair._id}
                 owner={playOwner}
                 ownerAvatar={playPlaylist?.ownerAvatar || playlist?.ownerAvatar || ""}
                 songs={playPlaylist?.songs || []}

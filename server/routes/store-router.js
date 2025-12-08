@@ -18,5 +18,6 @@ router.put('/playlist/:id', auth.verify, StoreController.updatePlaylist)
 router.get('/public/playlists', StoreController.getPublicPlaylists)
 router.get('/public/playlistpairs', StoreController.getPublicPlaylistPairs)
 router.get('/public/playlist/:id', StoreController.getPublicPlaylistById)
+router.post('/playlist/:id/listen', StoreController.incrementPlaylistListen)
 
 module.exports = router

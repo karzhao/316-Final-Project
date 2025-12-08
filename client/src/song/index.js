@@ -8,6 +8,7 @@ export const updateSong = (id, data) => api.put(`/${id}`, data);
 export const deleteSong = (id) => api.delete(`/${id}`);
 export const addSongToPlaylist = (songId, playlistId) => api.post('/add-to-playlist', { songId, playlistId });
 export const copySong = (id) => api.post(`/copy/${id}`);
+export const listenSong = (id) => api.post(`/listen/${id}`);
 
 const songApis = {
     getSongs,
@@ -15,7 +16,8 @@ const songApis = {
     updateSong,
     deleteSong,
     addSongToPlaylist,
-    copySong
+    copySong,
+    listenSong
 };
 
 export default songApis;

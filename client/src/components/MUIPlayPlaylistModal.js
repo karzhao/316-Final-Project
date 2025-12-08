@@ -57,6 +57,7 @@ export default function MUIPlayPlaylistModal({
     playlistName = "Playlist Title",
     owner = "Owner Name",
     ownerAvatar = "",
+    playlistId = "",
     songs = [],
     onClose = () => {}
 }) {
