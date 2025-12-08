@@ -111,7 +111,7 @@ const HomeScreen = ({ guestMode = false }) => {
         }
 
         return result;
-    }, [allPlaylists, filters, sortValue]);
+    }, [allPlaylists, appliedFilters, sortValue]);
 
     function handleCreateNewList() {
         (async () => {

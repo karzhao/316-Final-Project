@@ -28,23 +28,7 @@ function PlaylistCard(props) {
     const [editData, setEditData] = useState(playlist || null);
     const isOwner = !readOnly && auth.loggedIn && auth.user?.email && (playlist?.ownerEmail === auth.user.email || editData?.ownerEmail === auth.user.email);
     const [editName, setEditName] = useState(playlist?.name || idNamePair.name);
-
-    function handleLoadList(event, id) {
-        console.log("handleLoadList for " + id);
-        if (!event.target.disabled) {
-            let _id = event.target.id;
-            if (_id.indexOf('list-card-text-') >= 0)
-                _id = ("" + _id).substring("list-card-text-".length);
-
-            console.log("load " + event.target.id);
-
-            if (readOnly) {
-                store.setCurrentListPublic(id);
-            } else {
-                store.setCurrentList(id);
-            }
-        }
-    }
+    const [pendingRename, setPendingRename] = useState(null);
 
     async function handleDeleteList(event, id) {
         if (!isOwner) return;
@@ -103,14 +87,15 @@ function PlaylistCard(props) {
             setEditOpen(false);
             return;
         }
-        try {
-            const updated = { ...editData, name: editName };
-            await storeRequestSender.updatePlaylistById(idNamePair._id, updated);
-            store.loadIdNamePairs();
-            setEditData(updated);
-        } catch (err) {
-            console.error("Failed to save playlist name", err);
+        // Ensure pending rename transaction is applied before closing
+        if (pendingRename && store.currentList) {
+            const trimmed = pendingRename.trim();
+            if (trimmed && trimmed !== store.currentList.name) {
+                store.addRenamePlaylistTransaction(trimmed);
+            }
+            setPendingRename(null);
         }
+        store.loadIdNamePairs();
         setEditOpen(false);
     }
 
@@ -122,10 +107,6 @@ function PlaylistCard(props) {
             key={idNamePair._id}
             sx={{borderRadius:"25px", p: "10px", bgcolor: '#8000F00F', marginTop: '15px', display: 'flex', alignItems: 'center' }}
             style={{ width: '100%' }}
-            button
-            onClick={(event) => {
-                handleLoadList(event, idNamePair._id)
-            }}
         >
             <Box sx={{ p: 1, flexGrow: 1, fontSize: '24px', fontWeight: 600, border: isOwner ? '2px solid #0f7b2f' : 'none', borderRadius: '12px' }}>
                 {idNamePair.name}
@@ -178,6 +159,14 @@ function PlaylistCard(props) {
                 songs={store.currentList?.songs || editData?.songs || playlist?.songs || []}
                 onGoCatalog={() => { window.location.href = "/catalog/"; }}
                 onRename={(name) => setEditName(name)}
+                onRenameCommit={(name) => {
+                    const trimmed = (name || "").trim();
+                    setEditName(name);
+                    setPendingRename(name);
+                    if (store.currentList && trimmed && trimmed !== store.currentList.name) {
+                        store.addRenamePlaylistTransaction(trimmed);
+                    }
+                }}
                 onMoveUp={(idx) => store.addMoveSongTransaction(idx, Math.max(0, idx - 1))}
                 onMoveDown={(idx) => store.addMoveSongTransaction(idx, Math.min((store.currentList?.songs?.length || 1) -1, idx + 1))}
                 onRemove={(idx) => {

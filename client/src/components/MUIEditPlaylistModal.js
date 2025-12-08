@@ -7,11 +7,10 @@ import TextField from '@mui/material/TextField';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import IconButton from '@mui/material/IconButton';
-import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
+import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
+import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import Avatar from '@mui/material/Avatar';
-import Divider from '@mui/material/Divider';
 
 const baseStyle = {
     position: 'absolute',
@@ -19,7 +18,7 @@ const baseStyle = {
     left: '50%',
     transform: 'translate(-50%, -50%)',
     width: '70vw',
-    height: '75hw',
+    height: '75vh',
     minWidth: 640,
     bgcolor: '#b7f4b7',
     border: '2px solid #16752d',
@@ -60,21 +59,19 @@ const footerStyle = {
 };
 
 /**
- * Styling-only edit playlist modal (green theme). Wire up handlers later.
+ * Edit Playlist modal (green theme) with undo/redo and song controls.
  */
 export default function MUIEditPlaylistModal({
     open = false,
     playlistName = "Playlist title",
     owner = "Owner Name",
     ownerAvatar = "",
-    songs = [
-        { title: "Song One", artist: "Artist A", year: 2000 },
-        { title: "Song Two", artist: "Artist B", year: 2001 }
-    ],
+    songs = [],
     onClose = () => {},
     onConfirm = () => {},
     onGoCatalog = () => {},
     onRename = () => {},
+    onRenameCommit = () => {},
     onRemove = () => {},
     onMoveUp = () => {},
     onMoveDown = () => {},
@@ -88,6 +85,17 @@ export default function MUIEditPlaylistModal({
     React.useEffect(() => {
         setNameValue(playlistName);
     }, [playlistName, open]);
+
+    const commitRename = () => {
+        onRenameCommit(nameValue);
+    };
+
+    const handleNameKeyDown = (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            commitRename();
+        }
+    };
 
     return (
         <Modal open={open} aria-labelledby="edit-playlist-title">
@@ -111,11 +119,12 @@ export default function MUIEditPlaylistModal({
                                     setNameValue(e.target.value);
                                     onRename(e.target.value);
                                 }}
+                                onBlur={commitRename}
+                                onKeyDown={handleNameKeyDown}
                             />
                             <Typography variant="caption" sx={{ color: '#2f5930' }}>{owner}</Typography>
                         </Box>
                     </Box>
-                    <Button variant="contained" color="success" size="small" sx={{ ml: 1 }}>+ / ↻</Button>
                 </Box>
 
                 <Box sx={listContainer}>
@@ -125,10 +134,15 @@ export default function MUIEditPlaylistModal({
                                 key={idx}
                                 secondaryAction={
                                     <Box sx={{ display: 'flex', gap: 0.5 }}>
-                                        <IconButton edge="end" size="small" onClick={() => onMoveUp(idx)}><DragIndicatorIcon fontSize="small" /></IconButton>
-                                        <IconButton edge="end" size="small" onClick={() => onMoveDown(idx)}><DragIndicatorIcon fontSize="small" /></IconButton>
-                                        <IconButton edge="end" size="small"><EditIcon fontSize="small" /></IconButton>
-                                        <IconButton edge="end" size="small" onClick={() => onRemove(idx)}><DeleteIcon fontSize="small" /></IconButton>
+                                        <IconButton edge="end" size="small" onClick={() => onMoveUp(idx)} aria-label="move up">
+                                            <ArrowUpwardIcon fontSize="small" />
+                                        </IconButton>
+                                        <IconButton edge="end" size="small" onClick={() => onMoveDown(idx)} aria-label="move down">
+                                            <ArrowDownwardIcon fontSize="small" />
+                                        </IconButton>
+                                        <IconButton edge="end" size="small" onClick={() => onRemove(idx)} aria-label="remove song">
+                                            <DeleteIcon fontSize="small" />
+                                        </IconButton>
                                     </Box>
                                 }
                             >

@@ -6,6 +6,7 @@ import CreateSong_Transaction from '../transactions/CreateSong_Transaction'
 import MoveSong_Transaction from '../transactions/MoveSong_Transaction'
 import RemoveSong_Transaction from '../transactions/RemoveSong_Transaction'
 import UpdateSong_Transaction from '../transactions/UpdateSong_Transaction'
+import RenamePlaylist_Transaction from '../transactions/RenamePlaylist_Transaction'
 import AuthContext from '../auth'
 
 /*
@@ -438,7 +439,6 @@ function GlobalStoreContextProvider(props) {
                         type: GlobalStoreActionType.SET_CURRENT_LIST,
                         payload: playlist
                     });
-                    history.push("/playlist/" + playlist._id);
                 }
             }
         }
@@ -564,6 +564,38 @@ function GlobalStoreContextProvider(props) {
         //let song = store.currentList.songs[index];
         let transaction = new RemoveSong_Transaction(store, index, song);
         tps.processTransaction(transaction);
+    }
+    store.addRenamePlaylistTransaction = function(newName) {
+        if (isGuest() || !store.currentList) return;
+        let transaction = new RenamePlaylist_Transaction(store, store.currentList._id, store.currentList.name, newName);
+        tps.processTransaction(transaction);
+    }
+    store.renamePlaylist = async function(id, newName) {
+        if (isGuest()) return;
+        async function asyncRename() {
+            let response = await storeRequestSender.getPlaylistById(id);
+            if (!response.data.success) return;
+            let playlist = response.data.playlist;
+            playlist.name = newName;
+            const updateResp = await storeRequestSender.updatePlaylistById(id, playlist);
+            if (!updateResp.data.success) return;
+            const pairResp = await storeRequestSender.getPlaylistPairs();
+            if (pairResp.data.success) {
+                setStore((prevStore) => ({
+                    ...prevStore,
+                    currentList: playlist,
+                    idNamePairs: pairResp.data.idNamePairs,
+                    currentModal: CurrentModal.NONE,
+                    currentSongIndex: -1,
+                    currentSong: null,
+                    listNameActive: false,
+                    listIdMarkedForDeletion: null,
+                    listMarkedForDeletion: null
+                }));
+                playlistListeners.forEach((fn) => fn && fn());
+            }
+        }
+        await asyncRename();
     }
     store.addUpdateSongTransaction = function (index, newSongData) {
         if (isGuest()) return;
