@@ -23,6 +23,15 @@
       ],
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Reset Mongo Data (with songs)",
+      "program": "${workspaceFolder}/server/scripts/reset-mongo.js",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}/server",
+      "internalConsoleOptions": "neverOpen"
     }
   ]
 }

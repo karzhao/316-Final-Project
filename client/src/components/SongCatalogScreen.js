@@ -23,6 +23,7 @@ import AddIcon from '@mui/icons-material/Add';
 import MUIRemoveSongModal from './MUIRemoveSongModal';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import Menu from '@mui/material/Menu';
+import Divider from '@mui/material/Divider';
 
 const sortOptions = [
     { value: 'listens-desc', label: 'Listens (Hi-Lo)' },
@@ -49,6 +50,7 @@ export default function SongCatalogScreen() {
     const [addMenu, setAddMenu] = useState({ open: false, songId: null });
     const [removeModal, setRemoveModal] = useState({ open: false, song: null });
     const [actionsMenu, setActionsMenu] = useState({ anchorEl: null, song: null });
+    const [selectedSong, setSelectedSong] = useState(null);
 
     useEffect(() => {
         if (auth.loggedIn) {
@@ -129,6 +131,10 @@ export default function SongCatalogScreen() {
         setAddMenu({ open: false, songId: null });
     };
 
+    const handleSelectSong = (song) => {
+        setSelectedSong(song);
+    };
+
     const openActionsMenu = (event, song) => {
         if (!auth.loggedIn) return;
         setActionsMenu({ anchorEl: event.currentTarget, song });
@@ -154,6 +160,24 @@ export default function SongCatalogScreen() {
                             <Button variant="outlined" onClick={handleClear}>Clear</Button>
                         </Box>
                     </Stack>
+                    {selectedSong && selectedSong.youTubeId && (
+                        <Box sx={{ mt: 3 }}>
+                            <Divider sx={{ mb: 1 }} />
+                            <Typography variant="subtitle1" sx={{ mb: 1 }}>
+                                Now Playing: {selectedSong.title} by {selectedSong.artist} ({selectedSong.year})
+                            </Typography>
+                            <Box sx={{ position: 'relative', paddingTop: '56.25%', border: '1px solid #d6e9d6', borderRadius: 1, overflow: 'hidden' }}>
+                                <iframe
+                                    title={selectedSong.title}
+                                    src={`https://www.youtube.com/embed/${selectedSong.youTubeId}`}
+                                    style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
+                                    frameBorder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowFullScreen
+                                />
+                            </Box>
+                        </Box>
+                    )}
                 </Grid>
                 <Grid item xs={12} md={8}>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
@@ -172,7 +196,15 @@ export default function SongCatalogScreen() {
                         {filteredSongs.map((song) => {
                             const owned = ownedEmail && song.ownerEmail === ownedEmail;
                             return (
-                                <Card key={song._id} sx={{ border: owned ? '2px solid #0f7b2f' : '1px solid #ddd' }}>
+                                <Card
+                                    key={song._id}
+                                    onClick={() => handleSelectSong(song)}
+                                    sx={{
+                                        border: owned ? '2px solid #0f7b2f' : '1px solid #ddd',
+                                        cursor: 'pointer',
+                                        backgroundColor: selectedSong?._id === song._id ? '#fffbe6' : '#fff'
+                                    }}
+                                >
                                     <CardContent>
                                         <Typography variant="h6">{song.title} ({song.year})</Typography>
                                         <Typography variant="subtitle2" color="text.secondary">{song.artist}</Typography>
