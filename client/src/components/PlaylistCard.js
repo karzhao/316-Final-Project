@@ -91,9 +91,19 @@ function PlaylistCard(props) {
             return;
         }
         const trimmedName = (pendingRename || editName || "").trim();
+        const duplicate = store.idNamePairs.some(
+            (p) => p._id !== (store.currentList?._id || editData?._id) && (p.name || "").trim().toLowerCase() === trimmedName.toLowerCase()
+        );
+        if (duplicate) {
+            alert("You already have a playlist with that name.");
+            setPendingRename(null);
+            setEditName(originalName);
+            setEditData((prev) => prev ? ({...prev, name: originalName}) : prev);
+            setEditOpen(false);
+            return;
+        }
         if (store.currentList && trimmedName && trimmedName !== originalName) {
             store.addRenamePlaylistTransaction(trimmedName);
-            await store.renamePlaylist(store.currentList._id, trimmedName);
             setOriginalName(trimmedName);
         }
         setPendingRename(null);

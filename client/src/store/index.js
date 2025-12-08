@@ -289,7 +289,13 @@ function GlobalStoreContextProvider(props) {
     // THIS FUNCTION CREATES A NEW LIST
     store.createNewList = async function () {
         if (isGuest()) return null;
-        let newListName = "Untitled" + store.newListCounter;
+        const existingNames = new Set(store.idNamePairs.map((p) => (p.name || "").toLowerCase()));
+        let counter = store.newListCounter;
+        let newListName = `Untitled${counter}`;
+        while (existingNames.has(newListName.toLowerCase())) {
+            counter += 1;
+            newListName = `Untitled${counter}`;
+        }
         const response = await storeRequestSender.createPlaylist(newListName, [], auth.user.email);
         console.log("createNewList response: " + response);
         if (response.status === 201) {
@@ -312,17 +318,36 @@ function GlobalStoreContextProvider(props) {
     store.copyPlaylist = async function (id) {
         if (isGuest()) return;
         async function asyncCopy(id) {
-            let response = await storeRequestSender.getPlaylistById(id);
-            if (!response.data.success) return;
-            let playlist = response.data.playlist;
-            const baseName = playlist.name + " Copy";
+            // Try owner fetch first, fall back to public
+            let playlist = null;
+            try {
+                const resOwner = await storeRequestSender.getPlaylistById(id);
+                if (resOwner?.data?.success) {
+                    playlist = resOwner.data.playlist;
+                }
+            } catch (e) {
+                // ignore and try public
+            }
+            if (!playlist) {
+                try {
+                    const resPublic = await storeRequestSender.getPublicPlaylistById(id);
+                    if (resPublic?.data?.success) {
+                        playlist = resPublic.data.playlist;
+                    }
+                } catch (e) {
+                    // give up
+                    return;
+                }
+            }
+            if (!playlist) return;
+            const baseName = (playlist.name || "Untitled") + " Copy";
             let candidate = baseName;
             let counter = 1;
             const existingNames = new Set(store.idNamePairs.map(p => p.name));
             while (existingNames.has(candidate)) {
                 candidate = `${baseName} ${counter++}`;
             }
-            const createResp = await storeRequestSender.createPlaylist(candidate, playlist.songs, auth.user.email);
+            const createResp = await storeRequestSender.createPlaylist(candidate, playlist.songs || [], auth.user.email);
             if (createResp.status === 201) {
                 store.loadIdNamePairs();
                 playlistListeners.forEach((fn) => fn && fn());
