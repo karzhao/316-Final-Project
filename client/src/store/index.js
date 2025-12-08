@@ -444,6 +444,22 @@ function GlobalStoreContextProvider(props) {
         }
         asyncSetCurrentList(id);
     }
+    store.setCurrentListModal = function (id) {
+        async function asyncSetCurrentListModal(id) {
+            let response = await storeRequestSender.getPlaylistById(id);
+            if (response.data.success) {
+                let playlist = response.data.playlist;
+                storeReducer({
+                    type: GlobalStoreActionType.SET_CURRENT_LIST,
+                    payload: playlist
+                });
+                tps.clearAllTransactions();
+                return playlist;
+            }
+            return null;
+        }
+        return asyncSetCurrentListModal(id);
+    }
     store.setCurrentListPublic = function(id) {
         async function asyncSetCurrentListPublic(id) {
             let response = await storeRequestSender.getPublicPlaylistById(id);

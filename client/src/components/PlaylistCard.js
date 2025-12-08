@@ -80,17 +80,16 @@ function PlaylistCard(props) {
 
     async function handleEditClick(event) {
         event.stopPropagation();
-        if (playlist) {
-            setEditData(playlist);
-            setEditName(playlist.name);
-            setEditOpen(true);
-            return;
-        }
         try {
-            const response = await storeRequestSender.getPlaylistById(idNamePair._id);
-            if (response.data.success) {
-                setEditData(response.data.playlist);
-                setEditName(response.data.playlist.name);
+            let data = playlist;
+            if (!data) {
+                data = await store.setCurrentListModal(idNamePair._id);
+            } else {
+                store.setCurrentListModal(idNamePair._id);
+            }
+            if (data) {
+                setEditData(data);
+                setEditName(data.name);
                 setEditOpen(true);
             }
         } catch (err) {
@@ -175,9 +174,19 @@ function PlaylistCard(props) {
                 playlistName={editName}
                 owner={playOwner}
                 ownerAvatar={editData?.ownerAvatar || playlist?.ownerAvatar || ""}
-                songs={editData?.songs || playlist?.songs || []}
+                songs={store.currentList?.songs || editData?.songs || playlist?.songs || []}
                 onGoCatalog={() => { window.location.href = "/catalog/"; }}
                 onRename={(name) => setEditName(name)}
+                onMoveUp={(idx) => store.addMoveSongTransaction(idx, Math.max(0, idx - 1))}
+                onMoveDown={(idx) => store.addMoveSongTransaction(idx, Math.min((store.currentList?.songs?.length || 1) -1, idx + 1))}
+                onRemove={(idx) => {
+                    const song = (store.currentList?.songs || [])[idx];
+                    if (song) store.addRemoveSongTransaction(song, idx);
+                }}
+                onUndo={() => store.undo()}
+                onRedo={() => store.redo()}
+                canUndo={store.canUndo()}
+                canRedo={store.canRedo()}
                 onConfirm={handleConfirmEdit}
                 onClose={() => setEditOpen(false)}
             />

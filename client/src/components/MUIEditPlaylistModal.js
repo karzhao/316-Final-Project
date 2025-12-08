@@ -18,8 +18,8 @@ const baseStyle = {
     top: '50%',
     left: '50%',
     transform: 'translate(-50%, -50%)',
-    width: '75vw',
-    maxWidth: 960,
+    width: '70vw',
+    height: '75hw',
     minWidth: 640,
     bgcolor: '#b7f4b7',
     border: '2px solid #16752d',
@@ -53,9 +53,10 @@ const listContainer = {
 
 const footerStyle = {
     display: 'flex',
-    justifyContent: 'flex-end',
+    justifyContent: 'space-between',
     gap: '12px',
-    padding: '0 16px 12px 16px'
+    padding: '0 16px 12px 16px',
+    alignItems: 'center'
 };
 
 /**
@@ -76,7 +77,11 @@ export default function MUIEditPlaylistModal({
     onRename = () => {},
     onRemove = () => {},
     onMoveUp = () => {},
-    onMoveDown = () => {}
+    onMoveDown = () => {},
+    onUndo = () => {},
+    onRedo = () => {},
+    canUndo = false,
+    canRedo = false
 }) {
     const [nameValue, setNameValue] = React.useState(playlistName);
 
@@ -134,9 +139,15 @@ export default function MUIEditPlaylistModal({
                 </Box>
 
                 <Box sx={footerStyle}>
-                    <Button variant="outlined" color="info" onClick={onGoCatalog}>Song Catalog</Button>
-                    <Button variant="contained" color="success" onClick={onConfirm}>Confirm Changes</Button>
-                    <Button variant="contained" color="inherit" onClick={onClose}>Close</Button>
+                    <Box sx={{ display: 'flex', gap: 1 }}>
+                        <Button variant="outlined" color="info" onClick={onGoCatalog}>Song Catalog</Button>
+                        <Button variant="outlined" disabled={!canUndo} onClick={onUndo}>Undo</Button>
+                        <Button variant="outlined" disabled={!canRedo} onClick={onRedo}>Redo</Button>
+                    </Box>
+                    <Box sx={{ display: 'flex', gap: 1 }}>
+                        <Button variant="contained" color="success" onClick={onConfirm}>Confirm Changes</Button>
+                        <Button variant="contained" color="inherit" onClick={onClose}>Close</Button>
+                    </Box>
                 </Box>
             </Box>
         </Modal>
