@@ -10,13 +10,17 @@ import IconButton from '@mui/material/IconButton';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
+import Avatar from '@mui/material/Avatar';
+import Divider from '@mui/material/Divider';
 
 const baseStyle = {
     position: 'absolute',
     top: '50%',
     left: '50%',
     transform: 'translate(-50%, -50%)',
-    width: 720,
+    width: '75vw',
+    maxWidth: 960,
+    minWidth: 640,
     bgcolor: '#b7f4b7',
     border: '2px solid #16752d',
     boxShadow: 24,
@@ -60,11 +64,17 @@ const footerStyle = {
 export default function MUIEditPlaylistModal({
     open = false,
     playlistName = "Playlist title",
+    owner = "Owner Name",
+    ownerAvatar = "",
     songs = [
         { title: "Song One", artist: "Artist A", year: 2000 },
         { title: "Song Two", artist: "Artist B", year: 2001 }
     ],
-    onClose = () => {}
+    onClose = () => {},
+    onRename = () => {},
+    onRemove = () => {},
+    onMoveUp = () => {},
+    onMoveDown = () => {}
 }) {
     return (
         <Modal open={open} aria-labelledby="edit-playlist-title">
@@ -73,15 +83,23 @@ export default function MUIEditPlaylistModal({
                     Edit Playlist
                 </Typography>
 
-                <Box sx={controlsRow}>
-                    <TextField
-                        fullWidth
-                        size="small"
-                        label="Playlist Name"
-                        value={playlistName}
-                        disabled
-                    />
-                    <Button variant="contained" color="success" size="small">+ / ↻</Button>
+                <Box sx={{ ...controlsRow, justifyContent: 'space-between' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexGrow: 1 }}>
+                        <Avatar sx={{ width: 36, height: 36, bgcolor: '#0f7b2f' }} src={ownerAvatar || undefined}>
+                            {owner ? owner.substring(0,2).toUpperCase() : ''}
+                        </Avatar>
+                        <Box sx={{ flexGrow: 1 }}>
+                            <TextField
+                                fullWidth
+                                size="small"
+                                label="Playlist Name"
+                                value={playlistName}
+                                onChange={(e) => onRename(e.target.value)}
+                            />
+                            <Typography variant="caption" sx={{ color: '#2f5930' }}>{owner}</Typography>
+                        </Box>
+                    </Box>
+                    <Button variant="contained" color="success" size="small" sx={{ ml: 1 }}>+ / ↻</Button>
                 </Box>
 
                 <Box sx={listContainer}>
@@ -91,9 +109,10 @@ export default function MUIEditPlaylistModal({
                                 key={idx}
                                 secondaryAction={
                                     <Box sx={{ display: 'flex', gap: 0.5 }}>
+                                        <IconButton edge="end" size="small" onClick={() => onMoveUp(idx)}><DragIndicatorIcon fontSize="small" /></IconButton>
+                                        <IconButton edge="end" size="small" onClick={() => onMoveDown(idx)}><DragIndicatorIcon fontSize="small" /></IconButton>
                                         <IconButton edge="end" size="small"><EditIcon fontSize="small" /></IconButton>
-                                        <IconButton edge="end" size="small"><DeleteIcon fontSize="small" /></IconButton>
-                                        <IconButton edge="end" size="small"><DragIndicatorIcon fontSize="small" /></IconButton>
+                                        <IconButton edge="end" size="small" onClick={() => onRemove(idx)}><DeleteIcon fontSize="small" /></IconButton>
                                     </Box>
                                 }
                             >

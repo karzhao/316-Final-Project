@@ -7,20 +7,22 @@ import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
 import Divider from '@mui/material/Divider';
+import Avatar from '@mui/material/Avatar';
 
 const baseStyle = {
     position: 'absolute',
     top: '50%',
     left: '50%',
     transform: 'translate(-50%, -50%)',
-    width: 720,
+    width: '70vw',
+    height: '75vh',
     bgcolor: '#b7f4b7',
     border: '2px solid #16752d',
     boxShadow: 24,
     borderRadius: 2,
     overflow: 'hidden',
     display: 'grid',
-    gridTemplateColumns: '1fr 1fr',
+    gridTemplateColumns: '1.1fr 1fr',
     gridTemplateRows: 'auto 1fr auto'
 };
 
@@ -52,6 +54,7 @@ export default function MUIPlayPlaylistModal({
     open = false,
     playlistName = "Playlist Title",
     owner = "Owner Name",
+    ownerAvatar = "",
     songs = [],
     onClose = () => {}
 }) {
@@ -86,11 +89,17 @@ export default function MUIPlayPlaylistModal({
                 </Typography>
 
                 <Box sx={leftPane}>
-                    <Typography variant="subtitle2" sx={{ color: '#1f3b1d', mb: 1 }}>
-                        {playlistName}
-                        <br />
-                        <span style={{ color: '#2f5930' }}>{owner}</span>
-                    </Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                        <Avatar sx={{ width: 36, height: 36, bgcolor: '#0f7b2f' }} src={ownerAvatar || undefined}>
+                            {owner ? owner.substring(0,2).toUpperCase() : ''}
+                        </Avatar>
+                        <Box>
+                            <Typography variant="subtitle1" sx={{ color: '#1f3b1d', fontWeight: 700 }}>
+                                {playlistName}
+                            </Typography>
+                            <Typography variant="caption" sx={{ color: '#2f5930' }}>{owner}</Typography>
+                        </Box>
+                    </Box>
                     <List sx={{ bgcolor: '#fff', borderRadius: 1, border: '1px solid #d6e9d6', maxHeight: 320, overflowY: 'auto' }}>
                         {songs.map((song, idx) => (
                             <React.Fragment key={idx}>
