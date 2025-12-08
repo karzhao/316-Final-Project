@@ -12,6 +12,7 @@ import MUIPlayPlaylistModal from './MUIPlayPlaylistModal'
 import MUIEditPlaylistModal from './MUIEditPlaylistModal'
 import EditAccountScreen from './EditAccountScreen'
 import RegisterScreen from './RegisterScreen'
+import SongCatalogScreen from './SongCatalogScreen'
 import SongCard from './SongCard'
 import SplashScreen from './SplashScreen'
 import Statusbar from './Statusbar'
@@ -38,6 +39,7 @@ export {
     MUIEditPlaylistModal,
     SongCard,
     RegisterScreen,
+    SongCatalogScreen,
     SplashScreen,
     Statusbar, 
     WorkspaceScreen }

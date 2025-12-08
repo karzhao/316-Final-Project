@@ -14,6 +14,7 @@ import MenuItem from '@mui/material/MenuItem';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import Avatar from '@mui/material/Avatar';
+import Button from '@mui/material/Button';
 
 export default function AppBanner() {
     const { auth } = useContext(AuthContext);
@@ -35,6 +36,7 @@ export default function AppBanner() {
     }
 
     const handleHouseClick = () => {
+        localStorage.removeItem("guestMode");
         store.closeCurrentList();
     }
 
@@ -116,8 +118,16 @@ export default function AppBanner() {
                         component="div"
                         sx={{ display: { xs: 'none', sm: 'block' } }}                        
                     >
-                        <Link onClick={handleHouseClick} style={{ textDecoration: 'none', color: 'white' }} to='/'>⌂</Link>
+                        <Link onClick={handleHouseClick} style={{ textDecoration: 'none', color: 'white' }} to='/'>?,</Link>
                     </Typography>
+                    <Box sx={{ display: 'flex', gap: 1, ml: 2 }}>
+                        <Button variant="contained" color="secondary" size="small" component={Link} to="/">
+                            Playlists
+                        </Button>
+                        <Button variant="contained" color="info" size="small" component={Link} to="/catalog/">
+                            Song Catalog
+                        </Button>
+                    </Box>
                     <Box sx={{ flexGrow: 1 }}>{editToolbar}</Box>
                     <Box sx={{ height: "90px", display: { xs: 'none', md: 'flex' } }}>
                         <IconButton

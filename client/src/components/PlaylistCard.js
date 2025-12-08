@@ -6,6 +6,9 @@ import EditIcon from '@mui/icons-material/Edit';
 import IconButton from '@mui/material/IconButton';
 import ListItem from '@mui/material/ListItem';
 import TextField from '@mui/material/TextField';
+import Button from '@mui/material/Button';
+import MUIPlayPlaylistModal from './MUIPlayPlaylistModal';
+import storeRequestSender from '../store/requests';
 
 /*
     This is a card in our list of top 5 lists. It lets select
@@ -19,6 +22,8 @@ function PlaylistCard(props) {
     const [editActive, setEditActive] = useState(false);
     const [text, setText] = useState("");
     const { idNamePair, readOnly } = props;
+    const [playOpen, setPlayOpen] = useState(false);
+    const [playPlaylist, setPlayPlaylist] = useState(null);
 
     function handleLoadList(event, id) {
         console.log("handleLoadList for " + id);
@@ -71,6 +76,23 @@ function PlaylistCard(props) {
         setText(event.target.value);
     }
 
+    async function handlePlayClick(event) {
+        event.stopPropagation();
+        try {
+            const response = readOnly
+                ? await storeRequestSender.getPublicPlaylistById(idNamePair._id)
+                : await storeRequestSender.getPlaylistById(idNamePair._id);
+            if (response.data.success) {
+                setPlayPlaylist(response.data.playlist);
+                setPlayOpen(true);
+            }
+        } catch (err) {
+            console.error("Failed to load playlist for play", err);
+        }
+    }
+
+    const playOwner = playPlaylist?.ownerName || playPlaylist?.ownerEmail || "";
+
     let cardElement =
         <ListItem
             id={idNamePair._id}
@@ -83,6 +105,9 @@ function PlaylistCard(props) {
             }}
         >
             <Box sx={{ p: 1, flexGrow: 1 }}>{idNamePair.name}</Box>
+            <Box sx={{ p: 1 }}>
+                <Button size="small" variant="contained" color="primary" onClick={handlePlayClick}>Play</Button>
+            </Box>
             {
                 !readOnly && <>
                 <Box sx={{ p: 1 }}>
@@ -121,7 +146,16 @@ function PlaylistCard(props) {
             />
     }
     return (
-        cardElement
+        <>
+            {cardElement}
+            <MUIPlayPlaylistModal
+                open={playOpen}
+                playlistName={playPlaylist?.name || idNamePair.name}
+                owner={playOwner}
+                songs={playPlaylist?.songs || []}
+                onClose={() => setPlayOpen(false)}
+            />
+        </>
     );
 }
 

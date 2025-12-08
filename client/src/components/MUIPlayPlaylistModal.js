@@ -48,19 +48,36 @@ const footerStyle = {
     padding: '0 16px 12px 16px'
 };
 
-/**
- * Styling-only play playlist modal (green theme). Replace dummy data when wiring up.
- */
 export default function MUIPlayPlaylistModal({
     open = false,
     playlistName = "Playlist Title",
     owner = "Owner Name",
-    songs = [
-        { title: "Song One", artist: "Artist A", year: 2000 },
-        { title: "Song Two", artist: "Artist B", year: 2001 }
-    ],
+    songs = [],
     onClose = () => {}
 }) {
+    const [currentIndex, setCurrentIndex] = React.useState(0);
+
+    React.useEffect(() => {
+        setCurrentIndex(0);
+    }, [playlistName, open]);
+
+    const currentSong = songs[currentIndex] || {};
+    const youTubeId = currentSong.youTubeId || currentSong.youtubeId;
+
+    const handleSelect = (idx) => {
+        setCurrentIndex(idx);
+    };
+
+    const handlePrev = () => {
+        if (songs.length === 0) return;
+        setCurrentIndex((idx) => (idx - 1 + songs.length) % songs.length);
+    };
+
+    const handleNext = () => {
+        if (songs.length === 0) return;
+        setCurrentIndex((idx) => (idx + 1) % songs.length);
+    };
+
     return (
         <Modal open={open} aria-labelledby="play-playlist-title">
             <Box sx={baseStyle}>
@@ -77,7 +94,7 @@ export default function MUIPlayPlaylistModal({
                     <List sx={{ bgcolor: '#fff', borderRadius: 1, border: '1px solid #d6e9d6', maxHeight: 320, overflowY: 'auto' }}>
                         {songs.map((song, idx) => (
                             <React.Fragment key={idx}>
-                                <ListItem dense button>
+                                <ListItem dense button selected={idx === currentIndex} onClick={() => handleSelect(idx)}>
                                     <ListItemText primary={`${idx + 1}. ${song.title}`} secondary={`${song.artist} (${song.year})`} />
                                 </ListItem>
                                 {idx < songs.length - 1 && <Divider />}
@@ -88,12 +105,24 @@ export default function MUIPlayPlaylistModal({
 
                 <Box sx={rightPane}>
                     <Box sx={{ bgcolor: '#ffffffb0', border: '1px solid #d6e9d6', borderRadius: 1, height: 240, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <Typography variant="body2" color="#2f5930">Video player placeholder</Typography>
+                        {youTubeId ? (
+                            <iframe
+                                width="100%"
+                                height="240"
+                                src={`https://www.youtube.com/embed/${youTubeId}`}
+                                title={currentSong.title}
+                                frameBorder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowFullScreen
+                            />
+                        ) : (
+                            <Typography variant="body2" color="#2f5930">Select a song to play</Typography>
+                        )}
                     </Box>
                     <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1, mt: 1 }}>
-                        <Button variant="outlined" size="small">⏮</Button>
-                        <Button variant="outlined" size="small">⏯</Button>
-                        <Button variant="outlined" size="small">⏭</Button>
+                        <Button variant="outlined" size="small" onClick={handlePrev} disabled={songs.length === 0}>⏮</Button>
+                        <Button variant="outlined" size="small" disabled>⏯</Button>
+                        <Button variant="outlined" size="small" onClick={handleNext} disabled={songs.length === 0}>⏭</Button>
                     </Box>
                 </Box>
 
