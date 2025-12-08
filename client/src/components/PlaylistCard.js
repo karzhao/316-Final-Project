@@ -24,7 +24,8 @@ function PlaylistCard(props) {
     const [playOpen, setPlayOpen] = useState(false);
     const [playPlaylist, setPlayPlaylist] = useState(null);
     const [editOpen, setEditOpen] = useState(false);
-    const isOwner = !readOnly && auth.loggedIn && auth.user?.email && playlist?.ownerEmail === auth.user.email;
+    const [editData, setEditData] = useState(playlist || null);
+    const isOwner = !readOnly && auth.loggedIn && auth.user?.email && (playlist?.ownerEmail === auth.user.email || editData?.ownerEmail === auth.user.email);
     const [editName, setEditName] = useState(playlist?.name || idNamePair.name);
 
     function handleLoadList(event, id) {
@@ -77,6 +78,42 @@ function PlaylistCard(props) {
         store.copyPlaylist(idNamePair._id);
     }
 
+    async function handleEditClick(event) {
+        event.stopPropagation();
+        if (playlist) {
+            setEditData(playlist);
+            setEditName(playlist.name);
+            setEditOpen(true);
+            return;
+        }
+        try {
+            const response = await storeRequestSender.getPlaylistById(idNamePair._id);
+            if (response.data.success) {
+                setEditData(response.data.playlist);
+                setEditName(response.data.playlist.name);
+                setEditOpen(true);
+            }
+        } catch (err) {
+            console.error("Failed to load playlist for edit", err);
+        }
+    }
+
+    async function handleConfirmEdit() {
+        if (!isOwner || !editData) {
+            setEditOpen(false);
+            return;
+        }
+        try {
+            const updated = { ...editData, name: editName };
+            await storeRequestSender.updatePlaylistById(idNamePair._id, updated);
+            store.loadIdNamePairs();
+            setEditData(updated);
+        } catch (err) {
+            console.error("Failed to save playlist name", err);
+        }
+        setEditOpen(false);
+    }
+
     const playOwner = playPlaylist?.ownerName || playPlaylist?.ownerEmail || playlist?.ownerEmail || "";
 
     let cardElement =
@@ -101,7 +138,7 @@ function PlaylistCard(props) {
                 </Box>
                 {isOwner && (
                     <Box sx={{ p: 1 }}>
-                        <Button size="small" variant="contained" color="success" onClick={() => setEditOpen(true)}>Edit</Button>
+                        <Button size="small" variant="contained" color="success" onClick={handleEditClick}>Edit</Button>
                     </Box>
                 )}
                 {isOwner && (
@@ -132,16 +169,11 @@ function PlaylistCard(props) {
                 open={editOpen}
                 playlistName={editName}
                 owner={playOwner}
-                ownerAvatar={playlist?.ownerAvatar || ""}
-                songs={playlist?.songs || []}
+                ownerAvatar={editData?.ownerAvatar || playlist?.ownerAvatar || ""}
+                songs={editData?.songs || playlist?.songs || []}
                 onGoCatalog={() => { window.location.href = "/catalog/"; }}
                 onRename={(name) => setEditName(name)}
-                onConfirm={() => {
-                    if (isOwner && editName && editName !== (playlist?.name || idNamePair.name)) {
-                        store.changeListName(idNamePair._id, editName);
-                    }
-                    setEditOpen(false);
-                }}
+                onConfirm={handleConfirmEdit}
                 onClose={() => setEditOpen(false)}
             />
         </>

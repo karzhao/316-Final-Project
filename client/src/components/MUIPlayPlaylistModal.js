@@ -8,6 +8,8 @@ import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
 import Divider from '@mui/material/Divider';
 import Avatar from '@mui/material/Avatar';
+import Checkbox from '@mui/material/Checkbox';
+import FormControlLabel from '@mui/material/FormControlLabel';
 
 const baseStyle = {
     position: 'absolute',
@@ -59,9 +61,13 @@ export default function MUIPlayPlaylistModal({
     onClose = () => {}
 }) {
     const [currentIndex, setCurrentIndex] = React.useState(0);
+    const [isPlaying, setIsPlaying] = React.useState(false);
+    const [loop, setLoop] = React.useState(false);
+    const playerRef = React.useRef(null);
 
     React.useEffect(() => {
         setCurrentIndex(0);
+        setIsPlaying(false);
     }, [playlistName, open]);
 
     const currentSong = songs[currentIndex] || {};
@@ -69,16 +75,56 @@ export default function MUIPlayPlaylistModal({
 
     const handleSelect = (idx) => {
         setCurrentIndex(idx);
+        setIsPlaying(true);
     };
 
     const handlePrev = () => {
         if (songs.length === 0) return;
         setCurrentIndex((idx) => (idx - 1 + songs.length) % songs.length);
+        setIsPlaying(true);
     };
 
     const handleNext = () => {
         if (songs.length === 0) return;
         setCurrentIndex((idx) => (idx + 1) % songs.length);
+        setIsPlaying(true);
+    };
+
+    const handlePlayerReady = (event) => {
+        playerRef.current = event.target;
+        if (isPlaying) {
+            playerRef.current.playVideo();
+        }
+    };
+
+    const handleStateChange = (event) => {
+        // 0 = ended, 1 = playing, 2 = paused
+        if (event.data === 0) {
+            if (loop && songs.length > 0) {
+                handleNext();
+            } else if (currentIndex < songs.length - 1) {
+                handleNext();
+            } else if (loop) {
+                setCurrentIndex(0);
+                setIsPlaying(true);
+            } else {
+                setIsPlaying(false);
+            }
+        }
+    };
+
+    const togglePlayPause = () => {
+        if (!playerRef.current) {
+            setIsPlaying((p) => !p);
+            return;
+        }
+        if (isPlaying) {
+            playerRef.current.pauseVideo();
+            setIsPlaying(false);
+        } else {
+            playerRef.current.playVideo();
+            setIsPlaying(true);
+        }
     };
 
     return (
@@ -116,22 +162,51 @@ export default function MUIPlayPlaylistModal({
                     <Box sx={{ bgcolor: '#ffffffb0', border: '1px solid #d6e9d6', borderRadius: 1, height: 240, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         {youTubeId ? (
                             <iframe
+                                key={currentIndex}
                                 width="100%"
                                 height="240"
-                                src={`https://www.youtube.com/embed/${youTubeId}`}
+                                src={`https://www.youtube.com/embed/${youTubeId}?enablejsapi=1&autoplay=${isPlaying ? 1 : 0}`}
                                 title={currentSong.title}
                                 frameBorder="0"
                                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                 allowFullScreen
+                                ref={(ref) => {
+                                    if (ref && ref.contentWindow) {
+                                        const onReady = () => {
+                                            try {
+                                                const player = new window.YT.Player(ref, {
+                                                    events: {
+                                                        'onReady': handlePlayerReady,
+                                                        'onStateChange': handleStateChange
+                                                    }
+                                                });
+                                            } catch (e) {
+                                                // ignore if YT not loaded
+                                            }
+                                        };
+                                        if (window.YT && window.YT.Player) {
+                                            onReady();
+                                        } else {
+                                            window.onYouTubeIframeAPIReady = onReady;
+                                            const tag = document.createElement('script');
+                                            tag.src = "https://www.youtube.com/iframe_api";
+                                            document.body.appendChild(tag);
+                                        }
+                                    }
+                                }}
                             />
                         ) : (
                             <Typography variant="body2" color="#2f5930">Select a song to play</Typography>
                         )}
                     </Box>
-                    <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1, mt: 1 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1, mt: 1, alignItems: 'center' }}>
                         <Button variant="outlined" size="small" onClick={handlePrev} disabled={songs.length === 0}>⏮</Button>
-                        <Button variant="outlined" size="small" disabled>⏯</Button>
+                        <Button variant="outlined" size="small" onClick={togglePlayPause} disabled={songs.length === 0}>{isPlaying ? "Pause" : "Play"}</Button>
                         <Button variant="outlined" size="small" onClick={handleNext} disabled={songs.length === 0}>⏭</Button>
+                        <FormControlLabel
+                            control={<Checkbox checked={loop} onChange={(e) => setLoop(e.target.checked)} />}
+                            label="Repeat"
+                        />
                     </Box>
                 </Box>
 
