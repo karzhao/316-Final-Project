@@ -59,15 +59,23 @@ export default function SongCatalogScreen() {
     }, [auth.loggedIn]);
 
     const loadSongs = async () => {
-        const params = {
-            title: filters.title || undefined,
-            artist: filters.artist || undefined,
-            year: filters.year || undefined,
-            sort: sortValue
-        };
-        const response = await songApis.getSongs(params);
-        if (response.data.success) {
-            setSongs(response.data.songs);
+        try {
+            const params = {
+                title: filters.title || undefined,
+                artist: filters.artist || undefined,
+                year: filters.year || undefined,
+                sort: sortValue
+            };
+            const response = await songApis.getSongs(params);
+            if (response.data.success && Array.isArray(response.data.songs)) {
+                setSongs(response.data.songs);
+            } else {
+                setSongs([]);
+                console.error('Failed to load songs', response.data);
+            }
+        } catch (err) {
+            console.error('Error loading songs', err);
+            setSongs([]);
         }
     };
 
