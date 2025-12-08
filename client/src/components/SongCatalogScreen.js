@@ -21,6 +21,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
 import MUIRemoveSongModal from './MUIRemoveSongModal';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import Menu from '@mui/material/Menu';
 
 const sortOptions = [
     { value: 'listens-desc', label: 'Listens (Hi-Lo)' },
@@ -46,6 +48,7 @@ export default function SongCatalogScreen() {
     const [songForm, setSongForm] = useState({ title: '', artist: '', year: '', youTubeId: '' });
     const [addMenu, setAddMenu] = useState({ open: false, songId: null });
     const [removeModal, setRemoveModal] = useState({ open: false, song: null });
+    const [actionsMenu, setActionsMenu] = useState({ anchorEl: null, song: null });
 
     useEffect(() => {
         if (auth.loggedIn) {
@@ -126,6 +129,13 @@ export default function SongCatalogScreen() {
         setAddMenu({ open: false, songId: null });
     };
 
+    const openActionsMenu = (event, song) => {
+        if (!auth.loggedIn) return;
+        setActionsMenu({ anchorEl: event.currentTarget, song });
+    };
+
+    const closeActionsMenu = () => setActionsMenu({ anchorEl: null, song: null });
+
     const ownedEmail = auth.user?.email || "";
 
     const filteredSongs = useMemo(() => songs, [songs]);
@@ -168,17 +178,11 @@ export default function SongCatalogScreen() {
                                         <Typography variant="subtitle2" color="text.secondary">{song.artist}</Typography>
                                         <Typography variant="caption">Listens: {song.listens || 0} | Playlists: {song.playlistsCount || 0}</Typography>
                                     </CardContent>
-                                    <CardActions>
+                                    <CardActions sx={{ justifyContent: 'flex-end' }}>
                                         {auth.loggedIn && (
-                                            <Button size="small" variant="contained" onClick={() => setAddMenu({ open: true, songId: song._id })}>
-                                                Add to Playlist
-                                            </Button>
-                                        )}
-                                        {owned && (
-                                            <>
-                                                <IconButton onClick={() => openEditSong(song)}><EditIcon /></IconButton>
-                                                <IconButton onClick={() => handleDeleteSong(song)}><DeleteIcon /></IconButton>
-                                            </>
+                                            <IconButton onClick={(e) => openActionsMenu(e, song)}>
+                                                <MoreVertIcon />
+                                            </IconButton>
                                         )}
                                     </CardActions>
                                 </Card>
@@ -244,6 +248,40 @@ export default function SongCatalogScreen() {
                 onConfirm={confirmDeleteSong}
                 onCancel={() => setRemoveModal({ open: false, song: null })}
             />
+
+            <Menu
+                anchorEl={actionsMenu.anchorEl}
+                open={Boolean(actionsMenu.anchorEl)}
+                onClose={closeActionsMenu}
+            >
+                <MenuItem
+                    disabled={!auth.loggedIn}
+                    onClick={() => {
+                        setAddMenu({ open: true, songId: actionsMenu.song?._id || null });
+                        closeActionsMenu();
+                    }}
+                >
+                    Add to Playlist
+                </MenuItem>
+                <MenuItem
+                    disabled={!auth.loggedIn || auth.user?.email !== actionsMenu.song?.ownerEmail}
+                    onClick={() => {
+                        if (actionsMenu.song) openEditSong(actionsMenu.song);
+                        closeActionsMenu();
+                    }}
+                >
+                    Edit Song
+                </MenuItem>
+                <MenuItem
+                    disabled={!auth.loggedIn || auth.user?.email !== actionsMenu.song?.ownerEmail}
+                    onClick={() => {
+                        if (actionsMenu.song) handleDeleteSong(actionsMenu.song);
+                        closeActionsMenu();
+                    }}
+                >
+                    Remove from Catalog
+                </MenuItem>
+            </Menu>
         </Box>
     );
 }
