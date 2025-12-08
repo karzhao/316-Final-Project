@@ -20,6 +20,7 @@ import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
+import MUIRemoveSongModal from './MUIRemoveSongModal';
 
 const sortOptions = [
     { value: 'listens-desc', label: 'Listens (Hi-Lo)' },
@@ -44,6 +45,7 @@ export default function SongCatalogScreen() {
     const [editingSong, setEditingSong] = useState(null);
     const [songForm, setSongForm] = useState({ title: '', artist: '', year: '', youTubeId: '' });
     const [addMenu, setAddMenu] = useState({ open: false, songId: null });
+    const [removeModal, setRemoveModal] = useState({ open: false, song: null });
 
     useEffect(() => {
         if (auth.loggedIn) {
@@ -108,10 +110,14 @@ export default function SongCatalogScreen() {
 
     const handleDeleteSong = async (song) => {
         if (!auth.loggedIn || auth.user?.email !== song.ownerEmail) return;
-        if (window.confirm("Delete this song from catalog?")) {
-            await songApis.deleteSong(song._id);
-            loadSongs();
-        }
+        setRemoveModal({ open: true, song });
+    };
+
+    const confirmDeleteSong = async () => {
+        if (!removeModal.song) return;
+        await songApis.deleteSong(removeModal.song._id);
+        setRemoveModal({ open: false, song: null });
+        loadSongs();
     };
 
     const handleAddToPlaylist = async (playlistId) => {
@@ -187,17 +193,31 @@ export default function SongCatalogScreen() {
                 </Grid>
             </Grid>
 
-            <Dialog open={modalOpen} onClose={() => setModalOpen(false)}>
-                <DialogTitle>{editingSong ? "Edit Song" : "New Song"}</DialogTitle>
-                <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
+            <Dialog
+                open={modalOpen}
+                onClose={() => setModalOpen(false)}
+                PaperProps={{
+                    sx: {
+                        bgcolor: '#b7f4b7',
+                        border: '2px solid #16752d',
+                        borderRadius: 2,
+                        minWidth: 400,
+                        maxWidth: '90vw'
+                    }
+                }}
+            >
+                <DialogTitle sx={{ bgcolor: '#0f7b2f', color: 'white', fontWeight: 'bold', pb: 1 }}>
+                    {editingSong ? "Edit Song" : "New Song"}
+                </DialogTitle>
+                <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
                     <TextField label="Title" value={songForm.title} onChange={(e) => setSongForm({ ...songForm, title: e.target.value })} />
                     <TextField label="Artist" value={songForm.artist} onChange={(e) => setSongForm({ ...songForm, artist: e.target.value })} />
                     <TextField label="Year" value={songForm.year} onChange={(e) => setSongForm({ ...songForm, year: e.target.value })} />
                     <TextField label="YouTube Id" value={songForm.youTubeId} onChange={(e) => setSongForm({ ...songForm, youTubeId: e.target.value })} />
                 </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setModalOpen(false)}>Cancel</Button>
-                    <Button variant="contained" onClick={handleSaveSong} disabled={!songForm.title || !songForm.artist || !songForm.year || !songForm.youTubeId}>Complete</Button>
+                <DialogActions sx={{ pb: 2, pr: 2 }}>
+                    <Button variant="contained" color="inherit" onClick={() => setModalOpen(false)}>Cancel</Button>
+                    <Button variant="contained" color="success" onClick={handleSaveSong} disabled={!songForm.title || !songForm.artist || !songForm.year || !songForm.youTubeId}>Complete</Button>
                 </DialogActions>
             </Dialog>
 
@@ -217,6 +237,13 @@ export default function SongCatalogScreen() {
                     <Button onClick={() => setAddMenu({ open: false, songId: null })}>Close</Button>
                 </DialogActions>
             </Dialog>
+
+            <MUIRemoveSongModal
+                open={removeModal.open}
+                songTitle={removeModal.song?.title || "this song"}
+                onConfirm={confirmDeleteSong}
+                onCancel={() => setRemoveModal({ open: false, song: null })}
+            />
         </Box>
     );
 }
