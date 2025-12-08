@@ -1,5 +1,5 @@
-import { useContext, useState } from 'react';
-import { Link } from 'react-router-dom'
+import { useContext, useEffect, useState } from 'react';
+import { Link, useLocation } from 'react-router-dom'
 import AuthContext from '../auth';
 import { GlobalStoreContext } from '../store'
 
@@ -22,7 +22,8 @@ export default function AppBanner() {
     const { store } = useContext(GlobalStoreContext);
     const [anchorEl, setAnchorEl] = useState(null);
     const isMenuOpen = Boolean(anchorEl);
-    const guestMode = localStorage.getItem("guestMode") === "true";
+    const location = useLocation();
+    const [guestMode, setGuestMode] = useState(localStorage.getItem("guestMode") === "true");
     const showNavigation = auth.loggedIn || guestMode;
 
     const handleProfileMenuOpen = (event) => {
@@ -36,12 +37,18 @@ export default function AppBanner() {
     const handleLogout = () => {
         handleMenuClose();
         auth.logoutUser();
+        setGuestMode(false);
     }
 
     const handleHouseClick = () => {
         localStorage.removeItem("guestMode");
+        setGuestMode(false);
         store.closeCurrentList();
     }
+
+    useEffect(() => {
+        setGuestMode(localStorage.getItem("guestMode") === "true");
+    }, [location.pathname, auth.loggedIn]);
 
     const menuId = 'primary-search-account-menu';
     const loggedOutMenu = (
