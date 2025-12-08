@@ -14,6 +14,7 @@ import Button from '@mui/material/Button';
 import MenuItem from '@mui/material/MenuItem';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
+import MUIEditPlaylistModal from './MUIEditPlaylistModal';
 
 /*
     Playlists screen with filters, sort, play/edit/delete/copy actions.
@@ -38,6 +39,7 @@ const HomeScreen = ({ guestMode = false }) => {
         songYear: ''
     });
     const [sortValue, setSortValue] = useState('listeners-desc');
+    const [editModalPlaylist, setEditModalPlaylist] = useState(null);
 
     useEffect(() => {
         async function load() {
@@ -105,7 +107,12 @@ const HomeScreen = ({ guestMode = false }) => {
     }, [allPlaylists, filters, sortValue]);
 
     function handleCreateNewList() {
-        store.createNewList();
+        (async () => {
+            const newList = await store.createNewList();
+            if (newList) {
+                setEditModalPlaylist(newList);
+            }
+        })();
     }
 
     const handleFilterChange = (field) => (event) => {
@@ -172,6 +179,16 @@ const HomeScreen = ({ guestMode = false }) => {
                 </List>
                 <MUIDeleteModal />
             </Grid>
+            <MUIEditPlaylistModal
+                open={Boolean(editModalPlaylist)}
+                playlistName={editModalPlaylist?.name || ""}
+                owner={editModalPlaylist?.ownerEmail || ""}
+                songs={editModalPlaylist?.songs || []}
+                onRename={(name) => setEditModalPlaylist(p => ({...p, name}))}
+                onConfirm={() => setEditModalPlaylist(null)}
+                onClose={() => setEditModalPlaylist(null)}
+                onGoCatalog={() => window.location.href = "/catalog/"}
+            />
         </Grid>
     );
 }

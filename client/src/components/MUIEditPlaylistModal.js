@@ -71,11 +71,19 @@ export default function MUIEditPlaylistModal({
         { title: "Song Two", artist: "Artist B", year: 2001 }
     ],
     onClose = () => {},
+    onConfirm = () => {},
+    onGoCatalog = () => {},
     onRename = () => {},
     onRemove = () => {},
     onMoveUp = () => {},
     onMoveDown = () => {}
 }) {
+    const [nameValue, setNameValue] = React.useState(playlistName);
+
+    React.useEffect(() => {
+        setNameValue(playlistName);
+    }, [playlistName, open]);
+
     return (
         <Modal open={open} aria-labelledby="edit-playlist-title">
             <Box sx={baseStyle}>
@@ -93,8 +101,11 @@ export default function MUIEditPlaylistModal({
                                 fullWidth
                                 size="small"
                                 label="Playlist Name"
-                                value={playlistName}
-                                onChange={(e) => onRename(e.target.value)}
+                                value={nameValue}
+                                onChange={(e) => {
+                                    setNameValue(e.target.value);
+                                    onRename(e.target.value);
+                                }}
                             />
                             <Typography variant="caption" sx={{ color: '#2f5930' }}>{owner}</Typography>
                         </Box>
@@ -123,6 +134,8 @@ export default function MUIEditPlaylistModal({
                 </Box>
 
                 <Box sx={footerStyle}>
+                    <Button variant="outlined" color="info" onClick={onGoCatalog}>Song Catalog</Button>
+                    <Button variant="contained" color="success" onClick={onConfirm}>Confirm Changes</Button>
                     <Button variant="contained" color="inherit" onClick={onClose}>Close</Button>
                 </Box>
             </Box>

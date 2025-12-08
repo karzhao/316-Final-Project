@@ -25,6 +25,7 @@ function PlaylistCard(props) {
     const [playPlaylist, setPlayPlaylist] = useState(null);
     const [editOpen, setEditOpen] = useState(false);
     const isOwner = !readOnly && auth.loggedIn && auth.user?.email && playlist?.ownerEmail === auth.user.email;
+    const [editName, setEditName] = useState(playlist?.name || idNamePair.name);
 
     function handleLoadList(event, id) {
         console.log("handleLoadList for " + id);
@@ -89,7 +90,7 @@ function PlaylistCard(props) {
                 handleLoadList(event, idNamePair._id)
             }}
         >
-            <Box sx={{ p: 1, flexGrow: 1, fontSize: '24px', fontWeight: 600 }}>{idNamePair.name}</Box>
+            <Box sx={{ p: 1, flexGrow: 1, fontSize: '24px', fontWeight: 600, border: isOwner ? '2px solid #0f7b2f' : 'none', borderRadius: '12px' }}>{idNamePair.name}</Box>
             <Box sx={{ p: 1 }}>
                 <Button size="small" variant="contained" color="primary" onClick={handlePlayClick}>Play</Button>
             </Box>
@@ -123,15 +124,24 @@ function PlaylistCard(props) {
                 open={playOpen}
                 playlistName={playPlaylist?.name || idNamePair.name}
                 owner={playOwner}
+                ownerAvatar={playPlaylist?.ownerAvatar || playlist?.ownerAvatar || ""}
                 songs={playPlaylist?.songs || []}
                 onClose={() => setPlayOpen(false)}
             />
             <MUIEditPlaylistModal
                 open={editOpen}
-                playlistName={playlist?.name || idNamePair.name}
+                playlistName={editName}
                 owner={playOwner}
                 ownerAvatar={playlist?.ownerAvatar || ""}
                 songs={playlist?.songs || []}
+                onGoCatalog={() => { window.location.href = "/catalog/"; }}
+                onRename={(name) => setEditName(name)}
+                onConfirm={() => {
+                    if (isOwner && editName && editName !== (playlist?.name || idNamePair.name)) {
+                        store.changeListName(idNamePair._id, editName);
+                    }
+                    setEditOpen(false);
+                }}
                 onClose={() => setEditOpen(false)}
             />
         </>

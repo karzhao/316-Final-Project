@@ -287,7 +287,7 @@ function GlobalStoreContextProvider(props) {
 
     // THIS FUNCTION CREATES A NEW LIST
     store.createNewList = async function () {
-        if (isGuest()) return;
+        if (isGuest()) return null;
         let newListName = "Untitled" + store.newListCounter;
         const response = await storeRequestSender.createPlaylist(newListName, [], auth.user.email);
         console.log("createNewList response: " + response);
@@ -297,15 +297,14 @@ function GlobalStoreContextProvider(props) {
             storeReducer({
                 type: GlobalStoreActionType.CREATE_NEW_LIST,
                 payload: newList
-            }
-            );
-
-            // IF IT'S A VALID LIST THEN LET'S START EDITING IT
-            history.push("/playlist/" + newList._id);
+            });
             playlistListeners.forEach((fn) => fn && fn());
+            store.loadIdNamePairs();
+            return newList;
         }
         else {
             console.log("FAILED TO CREATE A NEW LIST");
+            return null;
         }
     }
 
