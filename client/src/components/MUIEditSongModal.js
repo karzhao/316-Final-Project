@@ -13,8 +13,8 @@ const modalStyle = {
     top: '50%',
     left: '50%',
     transform: 'translate(-50%, -50%)',
-    width: '70vw',
-    height: '75vh',
+    width: 420,
+    maxWidth: '90vw',
     bgcolor: '#b7f4b7',
     border: '2px solid #16752d',
     boxShadow: 24,
@@ -62,7 +62,7 @@ export default function MUIEditSongModal() {
             <Typography id="edit-song-modal-title" sx={headerStyle}>
                 Edit Song
             </Typography>
-            <Box sx={{padding: '16px 20px 8px 20px'}}>
+            <Box sx={{padding: '16px 20px 8px 20px', bgcolor: '#b7f4b7'}}>
                 <Stack spacing={2}>
                     <TextField
                         label="Title"
@@ -90,7 +90,7 @@ export default function MUIEditSongModal() {
                     />
                 </Stack>
             </Box>
-            <Box sx={{ display: 'flex', justifyContent: 'center', gap: '12px', padding: '0 20px 12px 20px' }}>
+            <Box sx={{ display: 'flex', justifyContent: 'center', gap: '12px', padding: '0 20px 12px 20px', bgcolor: '#b7f4b7' }}>
                 <Button variant="contained" color="success" disabled={!valid} onClick={handleConfirmEditSong}>
                     Complete
                 </Button>

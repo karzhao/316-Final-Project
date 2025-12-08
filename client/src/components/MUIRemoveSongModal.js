@@ -10,6 +10,7 @@ const baseStyle = {
     left: '50%',
     transform: 'translate(-50%, -50%)',
     width: 420,
+    maxWidth: '90vw',
     bgcolor: '#b7f4b7',
     border: '2px solid #16752d',
     boxShadow: 24,

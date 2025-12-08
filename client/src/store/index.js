@@ -235,7 +235,6 @@ function GlobalStoreContextProvider(props) {
             }
         }
         asyncSetCurrentList(id);
-        history.push("/playlist/635f203d2e072037af2e6284");
     }
 
     // THESE ARE THE FUNCTIONS THAT WILL UPDATE OUR STORE AND
@@ -469,7 +468,6 @@ function GlobalStoreContextProvider(props) {
                     type: GlobalStoreActionType.SET_CURRENT_LIST,
                     payload: playlist
                 });
-                history.push("/playlist/" + playlist._id);
             }
         }
         asyncSetCurrentListPublic(id);
@@ -618,6 +616,7 @@ function GlobalStoreContextProvider(props) {
                     type: GlobalStoreActionType.SET_CURRENT_LIST,
                     payload: store.currentList
                 });
+                playlistListeners.forEach((fn) => fn && fn());
             }
         }
         asyncUpdateCurrentList();

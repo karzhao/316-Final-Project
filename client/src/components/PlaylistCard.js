@@ -28,6 +28,7 @@ function PlaylistCard(props) {
     const [editData, setEditData] = useState(playlist || null);
     const isOwner = !readOnly && auth.loggedIn && auth.user?.email && (playlist?.ownerEmail === auth.user.email || editData?.ownerEmail === auth.user.email);
     const [editName, setEditName] = useState(playlist?.name || idNamePair.name);
+    const [originalName, setOriginalName] = useState(playlist?.name || idNamePair.name);
     const [pendingRename, setPendingRename] = useState(null);
 
     async function handleDeleteList(event, id) {
@@ -75,6 +76,8 @@ function PlaylistCard(props) {
             if (data) {
                 setEditData(data);
                 setEditName(data.name);
+                setOriginalName(data.name);
+                setPendingRename(null);
                 setEditOpen(true);
             }
         } catch (err) {
@@ -87,14 +90,13 @@ function PlaylistCard(props) {
             setEditOpen(false);
             return;
         }
-        // Ensure pending rename transaction is applied before closing
-        if (pendingRename && store.currentList) {
-            const trimmed = pendingRename.trim();
-            if (trimmed && trimmed !== store.currentList.name) {
-                store.addRenamePlaylistTransaction(trimmed);
-            }
-            setPendingRename(null);
+        const trimmedName = (pendingRename || editName || "").trim();
+        if (store.currentList && trimmedName && trimmedName !== originalName) {
+            store.addRenamePlaylistTransaction(trimmedName);
+            await store.renamePlaylist(store.currentList._id, trimmedName);
+            setOriginalName(trimmedName);
         }
+        setPendingRename(null);
         store.loadIdNamePairs();
         setEditOpen(false);
     }
@@ -161,12 +163,9 @@ function PlaylistCard(props) {
                 onRename={(name) => setEditName(name)}
                 onRenameCommit={(name) => {
                     const trimmed = (name || "").trim();
-                    setEditName(name);
-                    setEditData((prev) => prev ? ({...prev, name}) : prev);
-                    setPendingRename(name);
-                    if (store.currentList && trimmed && trimmed !== store.currentList.name) {
-                        store.addRenamePlaylistTransaction(trimmed);
-                    }
+                    setEditName(trimmed);
+                    setEditData((prev) => prev ? ({...prev, name: trimmed}) : prev);
+                    setPendingRename(trimmed);
                 }}
                 onReorder={(from, to) => {
                     if (store.currentList && from >= 0 && to >= 0 && from !== to) {
@@ -187,7 +186,11 @@ function PlaylistCard(props) {
                 canUndo={store.canUndo()}
                 canRedo={store.canRedo()}
                 onConfirm={handleConfirmEdit}
-                onClose={() => setEditOpen(false)}
+                onClose={() => {
+                    setPendingRename(null);
+                    setEditName(originalName);
+                    setEditOpen(false);
+                }}
             />
         </>
     );

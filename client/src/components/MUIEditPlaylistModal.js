@@ -83,14 +83,16 @@ export default function MUIEditPlaylistModal({
         setNameValue(playlistName);
     }, [playlistName, open]);
 
-    const commitRename = () => {
-        onRenameCommit(nameValue);
+    const commitRename = (val) => {
+        const nextVal = val !== undefined ? val : nameValue;
+        setNameValue(nextVal);
+        onRenameCommit(nextVal);
     };
 
     const handleNameKeyDown = (e) => {
         if (e.key === 'Enter') {
             e.preventDefault();
-            commitRename();
+            commitRename(e.target.value);
         }
     };
 
@@ -116,7 +118,6 @@ export default function MUIEditPlaylistModal({
                                     setNameValue(e.target.value);
                                     onRename(e.target.value);
                                 }}
-                                onBlur={commitRename}
                                 onKeyDown={handleNameKeyDown}
                             />
                             <Typography variant="caption" sx={{ color: '#2f5930' }}>{owner}</Typography>
