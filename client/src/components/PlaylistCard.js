@@ -127,7 +127,12 @@ function PlaylistCard(props) {
                 handleLoadList(event, idNamePair._id)
             }}
         >
-            <Box sx={{ p: 1, flexGrow: 1, fontSize: '24px', fontWeight: 600, border: isOwner ? '2px solid #0f7b2f' : 'none', borderRadius: '12px' }}>{idNamePair.name}</Box>
+            <Box sx={{ p: 1, flexGrow: 1, fontSize: '24px', fontWeight: 600, border: isOwner ? '2px solid #0f7b2f' : 'none', borderRadius: '12px' }}>
+                {idNamePair.name}
+                <Typography variant="caption" display="block" sx={{ color: '#444' }}>
+                    {playlist?.ownerName || playlist?.ownerEmail || ""}
+                </Typography>
+            </Box>
             <Box sx={{ p: 1 }}>
                 <Button size="small" variant="contained" color="primary" onClick={handlePlayClick}>Play</Button>
             </Box>
