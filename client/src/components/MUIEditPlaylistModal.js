@@ -8,8 +8,6 @@ import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@mui/icons-material/Delete';
-import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
-import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import Avatar from '@mui/material/Avatar';
 
 const baseStyle = {
@@ -73,8 +71,7 @@ export default function MUIEditPlaylistModal({
     onRename = () => {},
     onRenameCommit = () => {},
     onRemove = () => {},
-    onMoveUp = () => {},
-    onMoveDown = () => {},
+    onReorder = () => {},
     onUndo = () => {},
     onRedo = () => {},
     canUndo = false,
@@ -132,18 +129,23 @@ export default function MUIEditPlaylistModal({
                         {songs.map((song, idx) => (
                             <ListItem
                                 key={idx}
+                                draggable
+                                onDragStart={(e) => e.dataTransfer.setData('text/plain', String(idx))}
+                                onDragOver={(e) => {
+                                    e.preventDefault();
+                                }}
+                                onDrop={(e) => {
+                                    e.preventDefault();
+                                    const from = Number(e.dataTransfer.getData('text/plain'));
+                                    const to = idx;
+                                    if (!Number.isNaN(from) && from !== to) {
+                                        onReorder(from, to);
+                                    }
+                                }}
                                 secondaryAction={
-                                    <Box sx={{ display: 'flex', gap: 0.5 }}>
-                                        <IconButton edge="end" size="small" onClick={() => onMoveUp(idx)} aria-label="move up">
-                                            <ArrowUpwardIcon fontSize="small" />
-                                        </IconButton>
-                                        <IconButton edge="end" size="small" onClick={() => onMoveDown(idx)} aria-label="move down">
-                                            <ArrowDownwardIcon fontSize="small" />
-                                        </IconButton>
-                                        <IconButton edge="end" size="small" onClick={() => onRemove(idx)} aria-label="remove song">
-                                            <DeleteIcon fontSize="small" />
-                                        </IconButton>
-                                    </Box>
+                                    <IconButton edge="end" size="small" onClick={() => onRemove(idx)} aria-label="remove song">
+                                        <DeleteIcon fontSize="small" />
+                                    </IconButton>
                                 }
                             >
                                 <Typography variant="body2">{idx + 1}. {song.title} ({song.year}) by {song.artist}</Typography>

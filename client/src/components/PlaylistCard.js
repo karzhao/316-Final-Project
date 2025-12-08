@@ -162,13 +162,22 @@ function PlaylistCard(props) {
                 onRenameCommit={(name) => {
                     const trimmed = (name || "").trim();
                     setEditName(name);
+                    setEditData((prev) => prev ? ({...prev, name}) : prev);
                     setPendingRename(name);
                     if (store.currentList && trimmed && trimmed !== store.currentList.name) {
                         store.addRenamePlaylistTransaction(trimmed);
                     }
                 }}
-                onMoveUp={(idx) => store.addMoveSongTransaction(idx, Math.max(0, idx - 1))}
-                onMoveDown={(idx) => store.addMoveSongTransaction(idx, Math.min((store.currentList?.songs?.length || 1) -1, idx + 1))}
+                onReorder={(from, to) => {
+                    if (store.currentList && from >= 0 && to >= 0 && from !== to) {
+                        store.addMoveSongTransaction(from, to);
+                        setEditData((prev) => {
+                            if (!prev) return prev;
+                            const updated = {...prev, songs: [...(store.currentList?.songs || prev.songs)]};
+                            return updated;
+                        });
+                    }
+                }}
                 onRemove={(idx) => {
                     const song = (store.currentList?.songs || [])[idx];
                     if (song) store.addRemoveSongTransaction(song, idx);
