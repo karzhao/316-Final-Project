@@ -22,6 +22,8 @@ export default function AppBanner() {
     const { store } = useContext(GlobalStoreContext);
     const [anchorEl, setAnchorEl] = useState(null);
     const isMenuOpen = Boolean(anchorEl);
+    const guestMode = localStorage.getItem("guestMode") === "true";
+    const showNavigation = auth.loggedIn || guestMode;
 
     const handleProfileMenuOpen = (event) => {
         setAnchorEl(event.currentTarget);
@@ -124,14 +126,16 @@ export default function AppBanner() {
                     >
                         <HomeIcon />
                     </IconButton>
-                    <Box sx={{ display: 'flex', gap: 1, ml: 2 }}>
-                        <Button variant="contained" color="secondary" size="small" component={Link} to="/">
-                            Playlists
-                        </Button>
-                        <Button variant="contained" color="info" size="small" component={Link} to="/catalog/">
-                            Song Catalog
-                        </Button>
-                    </Box>
+                    {showNavigation && (
+                        <Box sx={{ display: 'flex', gap: 1, ml: 2 }}>
+                            <Button variant="contained" color="secondary" size="small" component={Link} to="/">
+                                Playlists
+                            </Button>
+                            <Button variant="contained" color="info" size="small" component={Link} to="/catalog/">
+                                Song Catalog
+                            </Button>
+                        </Box>
+                    )}
                     <Box sx={{ flexGrow: 1 }}>{editToolbar}</Box>
                     <Box sx={{ height: "90px", display: { xs: 'none', md: 'flex' } }}>
                         <IconButton
