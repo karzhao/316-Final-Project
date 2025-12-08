@@ -38,6 +38,13 @@ const HomeScreen = ({ guestMode = false }) => {
         songArtist: '',
         songYear: ''
     });
+    const [appliedFilters, setAppliedFilters] = useState({
+        name: '',
+        owner: '',
+        songTitle: '',
+        songArtist: '',
+        songYear: ''
+    });
     const [sortValue, setSortValue] = useState('listeners-desc');
     const [editModalPlaylist, setEditModalPlaylist] = useState(null);
 
@@ -60,11 +67,11 @@ const HomeScreen = ({ guestMode = false }) => {
     }, [guestMode]);
 
     const filtered = useMemo(() => {
-        const name = filters.name.toLowerCase();
-        const owner = filters.owner.toLowerCase();
-        const songTitle = filters.songTitle.toLowerCase();
-        const songArtist = filters.songArtist.toLowerCase();
-        const songYear = filters.songYear.trim();
+        const name = appliedFilters.name.toLowerCase();
+        const owner = appliedFilters.owner.toLowerCase();
+        const songTitle = appliedFilters.songTitle.toLowerCase();
+        const songArtist = appliedFilters.songArtist.toLowerCase();
+        const songYear = appliedFilters.songYear.trim();
 
         let result = allPlaylists.filter((p) => {
             const matchesName = !name || p.name?.toLowerCase().includes(name);
@@ -119,14 +126,31 @@ const HomeScreen = ({ guestMode = false }) => {
         setFilters({ ...filters, [field]: event.target.value });
     };
 
+    const applySearch = () => {
+        setAppliedFilters(filters);
+    };
+
     const handleClear = () => {
-        setFilters({
+        const cleared = {
             name: '',
             owner: '',
             songTitle: '',
             songArtist: '',
             songYear: ''
-        });
+        };
+        setFilters(cleared);
+        setAppliedFilters(cleared);
+    };
+
+    useEffect(() => {
+        setAppliedFilters(filters);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    const handleKeyDown = (event) => {
+        if (event.key === 'Enter') {
+            applySearch();
+        }
     };
 
     return (
@@ -134,13 +158,13 @@ const HomeScreen = ({ guestMode = false }) => {
             <Grid item xs={12} md={4}>
                 <Typography variant="h4" sx={{ fontWeight: 700, mb: 2 }}>Playlists</Typography>
                 <Stack spacing={1.5}>
-                    <TextField label="by Playlist Name" value={filters.name} onChange={handleFilterChange('name')} />
-                    <TextField label="by User Name" value={filters.owner} onChange={handleFilterChange('owner')} />
-                    <TextField label="by Song Title" value={filters.songTitle} onChange={handleFilterChange('songTitle')} />
-                    <TextField label="by Song Artist" value={filters.songArtist} onChange={handleFilterChange('songArtist')} />
-                    <TextField label="by Song Year" value={filters.songYear} onChange={handleFilterChange('songYear')} />
+                    <TextField label="by Playlist Name" value={filters.name} onChange={handleFilterChange('name')} onKeyDown={handleKeyDown} />
+                    <TextField label="by User Name" value={filters.owner} onChange={handleFilterChange('owner')} onKeyDown={handleKeyDown} />
+                    <TextField label="by Song Title" value={filters.songTitle} onChange={handleFilterChange('songTitle')} onKeyDown={handleKeyDown} />
+                    <TextField label="by Song Artist" value={filters.songArtist} onChange={handleFilterChange('songArtist')} onKeyDown={handleKeyDown} />
+                    <TextField label="by Song Year" value={filters.songYear} onChange={handleFilterChange('songYear')} onKeyDown={handleKeyDown} />
                     <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
-                        <Button variant="contained" onClick={() => {}}>Search</Button>
+                        <Button variant="contained" onClick={applySearch}>Search</Button>
                         <Button variant="outlined" onClick={handleClear}>Clear</Button>
                     </Box>
                 </Stack>
