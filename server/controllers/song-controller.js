@@ -140,10 +140,64 @@ const addSongToPlaylist = async (req, res) => {
     }
 };
 
+const copySong = async (req, res) => {
+    try {
+        const userId = auth.verifyUser(req);
+        if (!userId) return res.status(401).json({ errorMessage: "Unauthorized" });
+
+        const source = await Song.findById(req.params.id);
+        if (!source) return res.status(404).json({ errorMessage: "Song not found" });
+
+        const owner = await User.findById(userId);
+        if (!owner) return res.status(400).json({ errorMessage: "Owner not found" });
+
+        const baseTitle = source.title || "Untitled";
+        let candidate = baseTitle;
+        let counter = 1;
+        // Ensure unique title/artist/year combo
+        // eslint-disable-next-line no-constant-condition
+        while (true) {
+            const exists = await Song.findOne({ title: candidate, artist: source.artist, year: source.year });
+            if (!exists) break;
+            counter += 1;
+            candidate = `${baseTitle} Copy${counter > 2 ? " " + (counter - 1) : ""}`;
+        }
+
+        const copy = new Song({
+            title: candidate,
+            artist: source.artist,
+            year: source.year,
+            youTubeId: source.youTubeId,
+            ownerEmail: owner.email
+        });
+
+        const saved = await copy.save();
+        return res.status(201).json({ success: true, song: saved });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ errorMessage: "Server error copying song." });
+    }
+};
+
+const listenSong = async (req, res) => {
+    try {
+        const song = await Song.findById(req.params.id);
+        if (!song) return res.status(404).json({ success: false, errorMessage: "Song not found" });
+        song.listens = (song.listens || 0) + 1;
+        await song.save();
+        return res.status(200).json({ success: true, listens: song.listens });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ success: false, errorMessage: "Server error incrementing listens." });
+    }
+};
+
 module.exports = {
     createSong,
     getSongs,
     updateSong,
     deleteSong,
-    addSongToPlaylist
+    addSongToPlaylist,
+    copySong,
+    listenSong
 };

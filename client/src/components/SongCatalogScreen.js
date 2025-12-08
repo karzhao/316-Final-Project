@@ -24,6 +24,7 @@ import MUIRemoveSongModal from './MUIRemoveSongModal';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import Menu from '@mui/material/Menu';
 import Divider from '@mui/material/Divider';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 
 const sortOptions = [
     { value: 'listens-desc', label: 'Listens (Hi-Lo)' },
@@ -302,6 +303,26 @@ export default function SongCatalogScreen() {
                     }}
                 >
                     Add to Playlist
+                </MenuItem>
+                <MenuItem
+                    disabled={!auth.loggedIn}
+                    onClick={async () => {
+                        if (actionsMenu.song) {
+                            try {
+                                const res = await songApis.copySong(actionsMenu.song._id);
+                                if (!res?.data?.success) {
+                                    alert(res?.data?.errorMessage || "Failed to copy song.");
+                                }
+                                closeActionsMenu();
+                                loadSongs();
+                            } catch (err) {
+                                console.error('Error copying song', err);
+                                alert("Error copying song.");
+                            }
+                        }
+                    }}
+                >
+                    <ContentCopyIcon fontSize="small" sx={{ mr: 1 }} /> Copy Song
                 </MenuItem>
                 <MenuItem
                     disabled={!auth.loggedIn || auth.user?.email !== actionsMenu.song?.ownerEmail}

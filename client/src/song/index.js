@@ -7,13 +7,15 @@ export const createSong = (title, artist, year, youTubeId) => api.post('/', { ti
 export const updateSong = (id, data) => api.put(`/${id}`, data);
 export const deleteSong = (id) => api.delete(`/${id}`);
 export const addSongToPlaylist = (songId, playlistId) => api.post('/add-to-playlist', { songId, playlistId });
+export const copySong = (id) => api.post(`/copy/${id}`);
 
 const songApis = {
     getSongs,
     createSong,
     updateSong,
     deleteSong,
-    addSongToPlaylist
+    addSongToPlaylist,
+    copySong
 };
 
 export default songApis;
