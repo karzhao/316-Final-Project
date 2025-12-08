@@ -15,6 +15,7 @@ import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
+import HomeIcon from '@mui/icons-material/Home';
 
 export default function AppBanner() {
     const { auth } = useContext(AuthContext);
@@ -112,14 +113,17 @@ export default function AppBanner() {
         <Box sx={{flexGrow: 1}}>
             <AppBar position="static">
                 <Toolbar>
-                    <Typography                        
-                        variant="h4"
-                        noWrap
-                        component="div"
-                        sx={{ display: { xs: 'none', sm: 'block' } }}                        
+                    <IconButton
+                        size="large"
+                        edge="start"
+                        color="inherit"
+                        aria-label="home"
+                        onClick={handleHouseClick}
+                        component={Link}
+                        to="/"
                     >
-                        <Link onClick={handleHouseClick} style={{ textDecoration: 'none', color: 'white' }} to='/'>?,</Link>
-                    </Typography>
+                        <HomeIcon />
+                    </IconButton>
                     <Box sx={{ display: 'flex', gap: 1, ml: 2 }}>
                         <Button variant="contained" color="secondary" size="small" component={Link} to="/">
                             Playlists

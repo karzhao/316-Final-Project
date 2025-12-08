@@ -44,6 +44,8 @@ const CurrentModal = {
     ERROR : "ERROR"
 }
 
+const playlistListeners = [];
+
 // WITH THIS WE'RE MAKING OUR GLOBAL DATA STORE
 // AVAILABLE TO THE REST OF THE APPLICATION
 function GlobalStoreContextProvider(props) {
@@ -300,6 +302,7 @@ function GlobalStoreContextProvider(props) {
 
             // IF IT'S A VALID LIST THEN LET'S START EDITING IT
             history.push("/playlist/" + newList._id);
+            playlistListeners.forEach((fn) => fn && fn());
         }
         else {
             console.log("FAILED TO CREATE A NEW LIST");
@@ -322,6 +325,7 @@ function GlobalStoreContextProvider(props) {
             const createResp = await storeRequestSender.createPlaylist(candidate, playlist.songs, auth.user.email);
             if (createResp.status === 201) {
                 store.loadIdNamePairs();
+                playlistListeners.forEach((fn) => fn && fn());
             }
         }
         asyncCopy(id);
@@ -382,6 +386,7 @@ function GlobalStoreContextProvider(props) {
             store.loadIdNamePairs();
             if (response.data.success) {
                 history.push("/");
+                playlistListeners.forEach((fn) => fn && fn());
             }
         }
         processDelete(id);
@@ -610,6 +615,13 @@ function GlobalStoreContextProvider(props) {
     document.onkeydown = (event) => KeyPress(event);
 
     store.isGuest = isGuest;
+    store.addPlaylistListener = function(fn) {
+        playlistListeners.push(fn);
+        return () => {
+            const idx = playlistListeners.indexOf(fn);
+            if (idx >= 0) playlistListeners.splice(idx, 1);
+        };
+    }
 
     return (
         <GlobalStoreContext.Provider value={{

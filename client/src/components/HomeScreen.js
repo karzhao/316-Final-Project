@@ -53,6 +53,8 @@ const HomeScreen = ({ guestMode = false }) => {
             }
         }
         load();
+        const off = store.addPlaylistListener(load);
+        return () => { if (off) off(); }
     }, [guestMode]);
 
     const filtered = useMemo(() => {
