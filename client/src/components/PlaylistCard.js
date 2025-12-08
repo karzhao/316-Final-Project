@@ -6,6 +6,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import IconButton from '@mui/material/IconButton';
 import ListItem from '@mui/material/ListItem';
 import Button from '@mui/material/Button';
+import Typography from '@mui/material/Typography';
 import MUIPlayPlaylistModal from './MUIPlayPlaylistModal';
 import MUIEditPlaylistModal from './MUIEditPlaylistModal';
 import storeRequestSender from '../store/requests';
