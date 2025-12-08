@@ -15,6 +15,7 @@ router.get('/playlist/:id', auth.verify, StoreController.getPlaylistById)
 router.get('/playlistpairs', auth.verify, StoreController.getPlaylistPairs)
 router.get('/playlists', auth.verify, StoreController.getPlaylists)
 router.put('/playlist/:id', auth.verify, StoreController.updatePlaylist)
+router.get('/public/playlists', StoreController.getPublicPlaylists)
 router.get('/public/playlistpairs', StoreController.getPublicPlaylistPairs)
 router.get('/public/playlist/:id', StoreController.getPublicPlaylistById)
 

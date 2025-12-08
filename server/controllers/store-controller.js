@@ -179,6 +179,15 @@ getPlaylists = async (req, res) => {
         return res.status(200).json({ success: true, data: playlists })
     }).catch(err => console.log(err))
 }
+getPublicPlaylists = async (req, res) => {
+    try {
+        const playlists = await Playlist.find({});
+        return res.status(200).json({ success: true, data: playlists })
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ success: false, errorMessage: 'Failed to load playlists' });
+    }
+}
 getPublicPlaylistPairs = async (req, res) => {
     try {
         const playlists = await Playlist.find({}, '_id name').lean();
@@ -271,6 +280,7 @@ module.exports = {
     getPlaylistById,
     getPlaylistPairs,
     getPlaylists,
+    getPublicPlaylists,
     updatePlaylist,
     getPublicPlaylistPairs,
     getPublicPlaylistById

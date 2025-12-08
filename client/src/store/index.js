@@ -306,6 +306,27 @@ function GlobalStoreContextProvider(props) {
         }
     }
 
+    store.copyPlaylist = async function (id) {
+        if (isGuest()) return;
+        async function asyncCopy(id) {
+            let response = await storeRequestSender.getPlaylistById(id);
+            if (!response.data.success) return;
+            let playlist = response.data.playlist;
+            const baseName = playlist.name + " Copy";
+            let candidate = baseName;
+            let counter = 1;
+            const existingNames = new Set(store.idNamePairs.map(p => p.name));
+            while (existingNames.has(candidate)) {
+                candidate = `${baseName} ${counter++}`;
+            }
+            const createResp = await storeRequestSender.createPlaylist(candidate, playlist.songs, auth.user.email);
+            if (createResp.status === 201) {
+                store.loadIdNamePairs();
+            }
+        }
+        asyncCopy(id);
+    }
+
     // THIS FUNCTION LOADS ALL THE ID, NAME PAIRS SO WE CAN LIST ALL THE LISTS
     store.loadIdNamePairs = function () {
         async function asyncLoadIdNamePairs() {

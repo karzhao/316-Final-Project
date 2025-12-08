@@ -21,7 +21,7 @@ function PlaylistCard(props) {
     const { store } = useContext(GlobalStoreContext);
     const [editActive, setEditActive] = useState(false);
     const [text, setText] = useState("");
-    const { idNamePair, readOnly } = props;
+    const { idNamePair, readOnly, playlist } = props;
     const [playOpen, setPlayOpen] = useState(false);
     const [playPlaylist, setPlayPlaylist] = useState(null);
 
@@ -78,6 +78,11 @@ function PlaylistCard(props) {
 
     async function handlePlayClick(event) {
         event.stopPropagation();
+        if (playlist) {
+            setPlayPlaylist(playlist);
+            setPlayOpen(true);
+            return;
+        }
         try {
             const response = readOnly
                 ? await storeRequestSender.getPublicPlaylistById(idNamePair._id)
@@ -91,7 +96,12 @@ function PlaylistCard(props) {
         }
     }
 
-    const playOwner = playPlaylist?.ownerName || playPlaylist?.ownerEmail || "";
+    function handleCopy(event) {
+        event.stopPropagation();
+        store.copyPlaylist(idNamePair._id);
+    }
+
+    const playOwner = playPlaylist?.ownerName || playPlaylist?.ownerEmail || playlist?.ownerEmail || "";
 
     let cardElement =
         <ListItem
@@ -110,6 +120,9 @@ function PlaylistCard(props) {
             </Box>
             {
                 !readOnly && <>
+                <Box sx={{ p: 1 }}>
+                    <Button size="small" variant="contained" color="secondary" onClick={handleCopy}>Copy</Button>
+                </Box>
                 <Box sx={{ p: 1 }}>
                     <IconButton onClick={handleToggleEdit} aria-label='edit'>
                         <EditIcon style={{fontSize:'48pt'}} />
