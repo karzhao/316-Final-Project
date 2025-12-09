@@ -1,0 +1,326 @@
+{
+  "info": {
+    "_postman_id": "4c7f7d6c-5f4b-4c6f-9c2a-8c5b2f6d0001",
+    "name": "Playlister Local API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:4000"
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userName\": \"Test User\",\n  \"email\": \"test@example.com\",\n  \"password\": \"password123\",\n  \"passwordVerify\": \"password123\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/register"
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "// Cookies are kept in the Postman cookie jar automatically."
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/login"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Logged In",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/auth/loggedIn"
+          },
+          "response": []
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/auth/logout"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Playlists",
+      "item": [
+        {
+          "name": "Create Playlist",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const data = pm.response.json();",
+                  "pm.collectionVariables.set('playlistId', data.playlist?._id || '');",
+                  "pm.test('created', function () { pm.response.to.have.status(201); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"My List\",\n  \"songs\": [],\n  \"ownerEmail\": \"test@example.com\"\n}"
+            },
+            "url": "{{baseUrl}}/store/playlist"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Playlist By Id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/store/playlist/{{playlistId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "List Playlist Pairs (owned)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/store/playlistpairs"
+          },
+          "response": []
+        },
+        {
+          "name": "List All Playlists (owned)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/store/playlists"
+          },
+          "response": []
+        },
+        {
+          "name": "Increment Playlist Listens",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/store/playlist/{{playlistId}}/listen"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Playlist (name & songs)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"playlist\": {\n    \"name\": \"My Renamed List\",\n    \"songs\": [\n      { \"title\": \"Sample\", \"artist\": \"Artist\", \"year\": 2024, \"youTubeId\": \"dQw4w9WgXcQ\" }\n    ]\n  }\n}"
+            },
+            "url": "{{baseUrl}}/store/playlist/{{playlistId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Playlist",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/store/playlist/{{playlistId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Public Playlists (no auth)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/store/public/playlists"
+          },
+          "response": []
+        },
+        {
+          "name": "Public Playlist By Id (no auth)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/store/public/playlist/{{playlistId}}"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Songs",
+      "item": [
+        {
+          "name": "List Songs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/songs?sort=listens-desc"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Song",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const data = pm.response.json();",
+                  "pm.collectionVariables.set('songId', data.song?._id || '');",
+                  "pm.test('created', function () { pm.response.to.have.status(201); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"UniqueSong\",\n  \"artist\": \"Tester\",\n  \"year\": 2024,\n  \"youTubeId\": \"dQw4w9WgXcQ\"\n}"
+            },
+            "url": "{{baseUrl}}/songs"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Song",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"UniqueSong (Edited)\",\n  \"artist\": \"Tester\",\n  \"year\": 2024,\n  \"youTubeId\": \"dQw4w9WgXcQ\"\n}"
+            },
+            "url": "{{baseUrl}}/songs/{{songId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Listen Song",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/songs/listen/{{songId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Copy Song",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const data = pm.response.json();",
+                  "pm.collectionVariables.set('copiedSongId', data.song?._id || '');",
+                  "pm.test('copied', function () { pm.response.to.have.status(201); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/songs/copy/{{songId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Add Song To Playlist",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"songId\": \"{{songId}}\",\n  \"playlistId\": \"{{playlistId}}\"\n}"
+            },
+            "url": "{{baseUrl}}/songs/add-to-playlist"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Song",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/songs/{{songId}}"
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

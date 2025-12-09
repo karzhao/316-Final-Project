@@ -67,11 +67,13 @@ loginUser = async (req, res) => {
         const token = auth.signToken(existingUser._id);
         console.log(token);
 
-        res.cookie("token", token, {
+        const cookieOptions = {
             httpOnly: true,
-            secure: true,
-            sameSite: true
-        }).status(200).json({
+            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+            secure: process.env.NODE_ENV === 'production'
+        };
+
+        res.cookie("token", token, cookieOptions).status(200).json({
             success: true,
             user: {
                 userName: existingUser.userName,
@@ -87,12 +89,13 @@ loginUser = async (req, res) => {
 }
 
 logoutUser = async (req, res) => {
-    res.cookie("token", "", {
+    const cookieOptions = {
         httpOnly: true,
         expires: new Date(0),
-        secure: true,
-        sameSite: "none"
-    }).send();
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+        secure: process.env.NODE_ENV === 'production'
+    };
+    res.cookie("token", "", cookieOptions).send();
 }
 
 registerUser = async (req, res) => {
