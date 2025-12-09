@@ -28,7 +28,7 @@
               "mode": "raw",
               "raw": "{\n  \"userName\": \"Test User\",\n  \"email\": \"test@example.com\",\n  \"password\": \"password123\",\n  \"passwordVerify\": \"password123\"\n}"
             },
-            "url": "{{baseUrl}}/auth/register"
+            "url": "http://localhost:4000/auth/register"
           },
           "response": []
         },
@@ -60,7 +60,7 @@
               "mode": "raw",
               "raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"password123\"\n}"
             },
-            "url": "{{baseUrl}}/auth/login"
+            "url": "http://localhost:4000/auth/login"
           },
           "response": []
         },
@@ -69,7 +69,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/auth/loggedIn"
+            "url": "http://localhost:4000/auth/loggedIn"
           },
           "response": []
         },
@@ -78,7 +78,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/auth/logout"
+            "url": "http://localhost:4000/auth/logout"
           },
           "response": []
         }
@@ -114,7 +114,7 @@
               "mode": "raw",
               "raw": "{\n  \"name\": \"My List\",\n  \"songs\": [],\n  \"ownerEmail\": \"test@example.com\"\n}"
             },
-            "url": "{{baseUrl}}/store/playlist"
+            "url": "http://localhost:4000/store/playlist"
           },
           "response": []
         },
@@ -123,7 +123,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/store/playlist/{{playlistId}}"
+            "url": "http://localhost:4000/store/playlist/{{playlistId}}"
           },
           "response": []
         },
@@ -132,7 +132,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/store/playlistpairs"
+            "url": "http://localhost:4000/store/playlistpairs"
           },
           "response": []
         },
@@ -141,7 +141,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/store/playlists"
+            "url": "http://localhost:4000/store/playlists"
           },
           "response": []
         },
@@ -150,7 +150,7 @@
           "request": {
             "method": "POST",
             "header": [],
-            "url": "{{baseUrl}}/store/playlist/{{playlistId}}/listen"
+            "url": "http://localhost:4000/store/playlist/{{playlistId}}/listen"
           },
           "response": []
         },
@@ -168,7 +168,7 @@
               "mode": "raw",
               "raw": "{\n  \"playlist\": {\n    \"name\": \"My Renamed List\",\n    \"songs\": [\n      { \"title\": \"Sample\", \"artist\": \"Artist\", \"year\": 2024, \"youTubeId\": \"dQw4w9WgXcQ\" }\n    ]\n  }\n}"
             },
-            "url": "{{baseUrl}}/store/playlist/{{playlistId}}"
+            "url": "http://localhost:4000/store/playlist/{{playlistId}}"
           },
           "response": []
         },
@@ -177,7 +177,7 @@
           "request": {
             "method": "DELETE",
             "header": [],
-            "url": "{{baseUrl}}/store/playlist/{{playlistId}}"
+            "url": "http://localhost:4000/store/playlist/{{playlistId}}"
           },
           "response": []
         },
@@ -186,7 +186,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/store/public/playlists"
+            "url": "http://localhost:4000/store/public/playlists"
           },
           "response": []
         },
@@ -195,7 +195,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/store/public/playlist/{{playlistId}}"
+            "url": "http://localhost:4000/store/public/playlist/{{playlistId}}"
           },
           "response": []
         }
@@ -209,7 +209,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/songs?sort=listens-desc"
+            "url": "http://localhost:4000/songs?sort=listens-desc"
           },
           "response": []
         },
@@ -240,7 +240,7 @@
               "mode": "raw",
               "raw": "{\n  \"title\": \"UniqueSong\",\n  \"artist\": \"Tester\",\n  \"year\": 2024,\n  \"youTubeId\": \"dQw4w9WgXcQ\"\n}"
             },
-            "url": "{{baseUrl}}/songs"
+            "url": "http://localhost:4000/songs"
           },
           "response": []
         },
@@ -258,7 +258,7 @@
               "mode": "raw",
               "raw": "{\n  \"title\": \"UniqueSong (Edited)\",\n  \"artist\": \"Tester\",\n  \"year\": 2024,\n  \"youTubeId\": \"dQw4w9WgXcQ\"\n}"
             },
-            "url": "{{baseUrl}}/songs/{{songId}}"
+            "url": "http://localhost:4000/songs/{{songId}}"
           },
           "response": []
         },
@@ -267,7 +267,7 @@
           "request": {
             "method": "POST",
             "header": [],
-            "url": "{{baseUrl}}/songs/listen/{{songId}}"
+            "url": "http://localhost:4000/songs/listen/{{songId}}"
           },
           "response": []
         },
@@ -289,7 +289,7 @@
           "request": {
             "method": "POST",
             "header": [],
-            "url": "{{baseUrl}}/songs/copy/{{songId}}"
+            "url": "http://localhost:4000/songs/copy/{{songId}}"
           },
           "response": []
         },
@@ -307,7 +307,7 @@
               "mode": "raw",
               "raw": "{\n  \"songId\": \"{{songId}}\",\n  \"playlistId\": \"{{playlistId}}\"\n}"
             },
-            "url": "{{baseUrl}}/songs/add-to-playlist"
+            "url": "http://localhost:4000/songs/add-to-playlist"
           },
           "response": []
         },
@@ -316,7 +316,7 @@
           "request": {
             "method": "DELETE",
             "header": [],
-            "url": "{{baseUrl}}/songs/{{songId}}"
+            "url": "http://localhost:4000/songs/{{songId}}"
           },
           "response": []
         }
